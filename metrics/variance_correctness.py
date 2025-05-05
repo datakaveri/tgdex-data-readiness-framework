@@ -46,4 +46,4 @@ def check_categorical_variation(df, dominance_threshold=0.80):
         if df[col].value_counts(normalize=True).iloc[0] > dominance_threshold:
             dominant_cols.append(col)
     return {"dominant_categorical_columns": dominant_cols,
-            "percentage_dominant_categorical_columns": round(len(dominant_cols) / df.shape[1] * 100, 2)}
+            "percentage_dominant_categorical_columns": round(len(dominant_cols) / df.select_dtypes(include=['object', 'category']).shape[1] * 100, 2)}
