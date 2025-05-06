@@ -1,4 +1,4 @@
-def check_column_missing(df, threshold=0.3):
+def check_column_missing(df, threshold=0.0):
     """
     Check which columns have missing values above a certain threshold.
 
@@ -7,7 +7,7 @@ def check_column_missing(df, threshold=0.3):
     df : pandas.DataFrame
         DataFrame to check for missing values.
     threshold : float, optional
-        Minimum proportion of missing values in a column to report. Defaults to 0.3.
+        Minimum proportion of missing values in a column to report. Defaults to 0.0.
 
     Returns
     -------
@@ -23,15 +23,20 @@ def check_column_missing(df, threshold=0.3):
         the threshold relative to the total number of columns in the DataFrame.
     """
     missing_report = {
-        col: round(df[col].isnull().mean() * 100, 2)
+        col : round(df[col].isnull().mean() * 100, 2)
         for col in df.columns
-        if df[col].isnull().mean() > threshold
+        if df[col].isnull().mean() > threshold or (df[col].isnull().all() and not df[col].empty)
     }
-    return {"column_missing": missing_report,
-            "column_missing_count": len(missing_report),
-            "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 2)}
+    if not missing_report:
+        return {"column_missing": {},
+                "column_missing_count": 0,
+                "column_missing_percentage": 0.0}
+    else:
+        return {"column_missing": missing_report,
+                "column_missing_count": len(missing_report),
+                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 2)}
 
-def check_row_missing(df, threshold=0.5):
+def check_row_missing(df, threshold=0.0):
     """
     Check which rows have missing values above a certain threshold.
 
@@ -52,8 +57,9 @@ def check_row_missing(df, threshold=0.5):
     """
 
     count = df[df.isnull().mean(axis=1) > threshold].shape[0]
+    percentage = round(count / df.shape[0] * 100, 2) if count > 0 else 0.0
     return {"row_missing_count": count,
-            "row_missing_percentage": round(count / df.shape[0] * 100, 2)}
+            "row_missing_percentage": percentage}
 
 def check_row_duplicates(df):
     """
@@ -72,5 +78,7 @@ def check_row_duplicates(df):
         rows with exact duplicates, and the second maps to the percentage of
         rows with exact duplicates.
     """
-    return {"exact_row_duplicates": df.duplicated().sum(),
-            "exact_row_duplicates_percentage": round(df.duplicated().mean() * 100, 2)}  
+    count = df.duplicated(keep='first').sum()
+    percentage = round(df.duplicated().mean() * 100, 2) if count > 0 else 0.0
+    return {"exact_row_duplicates": count,
+            "exact_row_duplicates_percentage": percentage}  
