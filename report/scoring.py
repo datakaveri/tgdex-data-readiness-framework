@@ -44,10 +44,11 @@ def compute_aggregate_score(report_dict, df):
         detailed_scores["exact_row_duplicates"] = round(score, 2)
         total_score += score
 
-    # 4. Region coverage check (Boolean)
-    if "coverage_region_present" in report_dict:
-        score = weights["coverage_check"] if report_dict["region_coverage": "OK"] or  report_dict["region_coverage": "No region column found"] else 0
-        detailed_scores["coverage_check"] = score
+    # 4. Region coverage check (Based on percentage of missing values)
+    if "region_coverage" in report_dict:
+        missing_percentage = report_dict["region_coverage"]
+        score = max(0, weights["coverage_check"] * (1 - missing_percentage / 100))
+        detailed_scores["coverage_check"] = round(score, 2)
         total_score += score
 
     # 5. Numeric Variance (low-variance columns)
@@ -106,8 +107,8 @@ def compute_aggregate_score(report_dict, df):
         total_score += score
 
     # 11. Documentation Presence (Boolean)
-    if "documentation_present" in report_dict:
-        score = weights["documentation_presence"] if report_dict["documentation_present"] else 0
+    if "documentation_found" in report_dict:
+        score = weights["documentation_presence"] if report_dict["documentation_found"] else 0
 
         detailed_scores["documentation_presence"] = score
         total_score += score

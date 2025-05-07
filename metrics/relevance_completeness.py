@@ -18,5 +18,6 @@ def check_coverage_region(df):
     if not region_col:
         return {"region_coverage": "No region column found"}
     region_col = region_col[0]
-    is_valid = df[region_col].notnull().any()
-    return {"region_coverage": "OK" if is_valid else "Null values present"}
+    missing_percentage = df[region_col].isnull().mean() * 100
+    return {"region_coverage": missing_percentage}
+

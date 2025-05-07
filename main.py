@@ -15,3 +15,4 @@ if __name__ == "__main__":
     # print(init_report)
     final_report = scoring.compute_aggregate_score(init_report, df)
     write_report_outputs(final_report, "../outputReports", init_report)
+    print("Report generated successfully.")
