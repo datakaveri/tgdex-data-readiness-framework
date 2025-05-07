@@ -49,6 +49,10 @@ def check_date_format(df):
                 pd.to_datetime(sample, format="%Y-%m-%d")
             except:
                 date_format_issues.append(col)
-    return {"date_format_issues": date_format_issues,
-            "date_format_issues_count": len(date_format_issues),
-            "date_format_issues_percentage": round(len(date_format_issues) / df.shape[1] * 100, 2)}
+    if date_format_issues:
+        return {"date_format_issues": date_format_issues,
+                "date_format_issues_count": len(date_format_issues),
+                "date_format_issues_percentage": round(len(date_format_issues) / df.shape[1] * 100, 2)}
+    else:
+        return {"date_format_issues": None}
+

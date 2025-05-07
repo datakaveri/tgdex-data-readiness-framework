@@ -12,11 +12,12 @@ def check_label_presence(df, metadata):
     Returns
     -------
     dict
-        A dictionary with a single key "label_presence" which has a value of "OK"
-        if the label column is present and has non-null values, otherwise "Missing
-        or empty".
+        A dictionary with a single key "label_presence" which has a value of the
+        percentage of rows with non-null values in the label column if the label 
+        column is present, otherwise "Missing or empty".
     """
     label_col = metadata.get("label_column")
-    if label_col and label_col in df.columns and df[label_col].notnull().any():
-        return {"label_presence": "OK"}
-    return {"label_presence": "Missing or empty"}
+    if label_col and label_col in df.columns:
+        non_null_percentage = df[label_col].notnull().mean() * 100
+        return {"label_presence": f"{non_null_percentage:.2f}%"}
+    return {"label_presence": None}
