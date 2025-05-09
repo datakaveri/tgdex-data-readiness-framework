@@ -41,19 +41,39 @@ def check_date_format(df):
         DataFrame whose date format is not valid.
     """
     date_format_issues = []
-    date_pattern = re.compile(r"\d{4}-\d{2}-\d{2}")
+    date_patterns = {
+        "%Y-%m-%d": re.compile(r"\d{4}-\d{2}-\d{2}"),
+        "%d/%m/%Y": re.compile(r"\d{2}/\d{2}/\d{4}"),
+        "%m-%d-%Y": re.compile(r"\d{2}-\d{2}-\d{4}"),
+        "%Y-%m-%dT%H:%M:%S%z": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}"),
+        "%Y-%m-%dT%H:%M:%S.%f%z": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}\+\d{2}:\d{2}"),
+        "%Y-%m-%dT%H:%M:%SZ": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
+        "%Y-%m-%dT%H:%M:%S": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"),
+        "%Y-%m-%dT%H:%M:%S.%f": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}"),
+        "%m/%d/%Y %H:%M:%S": re.compile(r"\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2}"),
+        "%m/%d/%Y %H:%M:%S %z": re.compile(r"\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [+-]\d{4}"),
+    }
+    
     for col in df.select_dtypes(include=['datetime64']).columns:
-        sample = df[col].dropna().head(10)
-        if all(date_pattern.match(val.strftime("%Y-%m-%d")) for val in sample):
-            continue
-        try:
-            pd.to_datetime(sample, format="%Y-%m-%d")
-        except:
-            date_format_issues.append(col)
+        sample = df[col].dropna()
+        if sample.shape[0] > 100000:
+            sample = sample.head(100)
+        
+        for date_format, pattern in date_patterns.items():
+            if all(pattern.match(val.strftime(date_format)) for val in sample):
+                break
+        else:
+            try:
+                pd.to_datetime(sample, errors='raise')
+            except:
+                date_format_issues.append(col)
+    
     if date_format_issues:
-        return {"date_format_issues": date_format_issues,
-                "date_format_issues_count": len(date_format_issues),
-                "date_format_issues_percentage": round(len(date_format_issues) / df.shape[0] * 100, 2)}
+        return {
+            "date_format_issues": date_format_issues,
+            "date_format_issues_count": len(date_format_issues),
+            "date_format_issues_percentage": round(len(date_format_issues) / df.shape[0] * 100, 2)
+        }
     else:
         return {"date_format_issues": None}
 
