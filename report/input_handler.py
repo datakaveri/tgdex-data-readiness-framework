@@ -1,30 +1,23 @@
 import os
 import pandas as pd
+from report.pdf_writer import generate_pdf_from_json
 
 def load_data_from_directory(directory):
-    # Assuming the directory contains only CSV files
+    # Assuming the directory contains only CSV, Parquet and JSON files
     csv_files = [file for file in os.listdir(directory) if file.endswith('.csv')]
+    parquet_files = [file for file in os.listdir(directory) if file.endswith('.parquet')]
+    json_files = [file for file in os.listdir(directory) if file.endswith('.json') and 'metadata' not in file]
     
-    # Load the first CSV file as DataFrame
-    if csv_files:
-        file_path = os.path.join(directory, csv_files[0])
-        df = pd.read_csv(file_path)
-        return df, file_path
-    else:
-        raise FileNotFoundError("No CSV files found in the directory.")
-
-def main():
-    directory = input("Enter the directory containing data files: ")
-
-    try:
-        df, file_path = load_data_from_directory('../'+directory)
-        dsdescriptionFile = 'dataset_description.txt'
-        data_directory = '../'+directory
-        return df, file_path, data_directory
-        
-    except Exception as e:
-        print(f"Error: {e}")
-
-if __name__ == "__main__":
-    main()
+    data = []
+    for file in csv_files + parquet_files + json_files:
+        file_path = os.path.join(directory, file)
+        if file.endswith('.csv'):
+            df = pd.read_csv(file_path)
+        elif file.endswith('.parquet'):
+            df = pd.read_parquet(file_path)
+        elif file.endswith('.json'):
+            df = pd.read_json(file_path)
+        data.append((df, file_path))
+    
+    return data
 

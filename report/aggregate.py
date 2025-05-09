@@ -28,17 +28,18 @@ def generate_final_report(readiness_metrics_json_path):
     detailed_scores = readiness_metrics_raw["detailed_scores"]
 
     # Notes are constructed using raw metrics from the report
+    # TODO: Fix dynamic generation of notes
     def get_notes():
         return {
             "column_missing": f"{readiness_metrics_raw['column_missing_count']} of all columns exceed 30% missing threshold",
             "row_missing": f"{readiness_metrics_raw['row_missing_count']} out of rows exceed 50% missing threshold",
             "exact_row_duplicates": f"{readiness_metrics_raw['exact_row_duplicates']} duplicate rows found",
-            "coverage_check": "100.0% values present in 'Name_District' column", 
-            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of numeric columns have sufficient variance",
-            "categorical_variation": f"{36 - len(readiness_metrics_raw['dominant_categorical_columns'])} out of 36 categorical columns pass variation check",
+            "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values present in '{readiness_metrics_raw['region_column']}' column", 
+            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have sufficient variance",
+            "categorical_variation": f"{len(readiness_metrics_raw['dominant_categorical_columns'])} out of {(readiness_metrics_raw['number_of_categorical_columns'])} categorical columns pass variation check",
             "file_format_check": f"File format {readiness_metrics_raw['file_format'].lower()} is allowed",
-            "uniform_encoding": "Date Column not found",
-            "label_presence": "Label column 'No_HH' is present and valid",
+            "uniform_encoding": f"Date column {readiness_metrics_raw.get('date_column', 'not found')} not found",
+            "label_presence": f"Label column {readiness_metrics_raw.get('label_column', 'not checked')} is present and valid",
             "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No valid timestamp fields found",
             "documentation_presence": "README or data dictionary file found" if readiness_metrics_raw["documentation_found"] else "No documentation file found"
         }
@@ -88,14 +89,6 @@ def generate_final_report(readiness_metrics_json_path):
                     "score": detailed_scores["coverage_check"],
                     "max_score": 10
                 },
-                {
-                    "id": "2.2",
-                    "key": "mandatory_fields",
-                    "title": "Mandatory Fields",
-                    "note": "All mandatory fields present",
-                    "score": 5.0,
-                    "max_score": 5
-                }
             ]
         },
         {
