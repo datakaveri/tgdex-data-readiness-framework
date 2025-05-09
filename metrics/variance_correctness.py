@@ -23,7 +23,8 @@ def check_numeric_variance(df, std_threshold=0.1):
     low_variance_cols = [col for col in numeric_cols if df[col].std() < std_threshold]
     return {
         "low_variance_numeric_columns": low_variance_cols,
-        "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 2)
+        "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 2),
+        "number_of_numeric_columns": numeric_cols.shape[1]
     }
 
 def check_categorical_variation(df, dominance_threshold=0.80):
@@ -51,6 +52,7 @@ def check_categorical_variation(df, dominance_threshold=0.80):
     dominant_cols = [col for col in categorical_cols if df[col].value_counts(normalize=True).iloc[0] > dominance_threshold]
     return {
         "dominant_categorical_columns": dominant_cols,
-        "percentage_dominant_categorical_columns": round(len(dominant_cols) / categorical_cols.shape[1] * 100, 2)
+        "percentage_dominant_categorical_columns": round(len(dominant_cols) / categorical_cols.shape[1] * 100, 2),
+        "number_of_categorical_columns": categorical_cols.shape[1]
     }
 
