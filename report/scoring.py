@@ -47,8 +47,12 @@ def compute_aggregate_score(report_dict, df):
     # 4. Region coverage check (Based on percentage of missing values)
     if "region_coverage" in report_dict:
         missing_percentage = report_dict["region_coverage"]
+        region_column = report_dict["region_column"]
         score = max(0, weights["coverage_check"] * (1 - missing_percentage / 100))
-        detailed_scores["coverage_check"] = round(score, 2)
+        detailed_scores["coverage_check"] = {
+            "score": round(score, 2),
+            "region_column": region_column
+        }
         total_score += score
 
     # 5. Numeric Variance (low-variance columns)
