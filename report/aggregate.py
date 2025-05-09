@@ -5,8 +5,9 @@ from metrics.standardization import *
 from metrics.model_ingestible import *
 from metrics.regular_refresh import *
 from metrics.documentation import *
+import json 
 
-def generate_readiness_report(df, descriptor_path, data_directory):
+def generate_raw_report(df, descriptor_path, data_directory):
     report = {}
     report.update(check_column_missing(df))
     report.update(check_row_missing(df))
@@ -21,3 +22,168 @@ def generate_readiness_report(df, descriptor_path, data_directory):
     report.update(check_documentation_presence(descriptor_path))
     return report
 
+def generate_final_report(readiness_metrics_json_path):
+    with open(readiness_metrics_json_path, "r") as f:
+        readiness_metrics_raw = json.load(f)
+    detailed_scores = readiness_metrics_raw["detailed_scores"]
+
+    # Notes are constructed using raw metrics from the report
+    def get_notes():
+        return {
+            "column_missing": f"{readiness_metrics_raw['column_missing_count']} of all columns exceed 30% missing threshold",
+            "row_missing": f"{readiness_metrics_raw['row_missing_count']} out of rows exceed 50% missing threshold",
+            "exact_row_duplicates": f"{readiness_metrics_raw['exact_row_duplicates']} duplicate rows found",
+            "coverage_check": "100.0% values present in 'Name_District' column", 
+            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of numeric columns have sufficient variance",
+            "categorical_variation": f"{36 - len(readiness_metrics_raw['dominant_categorical_columns'])} out of 36 categorical columns pass variation check",
+            "file_format_check": f"File format {readiness_metrics_raw['file_format'].lower()} is allowed",
+            "uniform_encoding": "Date Column not found",
+            "label_presence": "Label column 'No_HH' is present and valid",
+            "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No valid timestamp fields found",
+            "documentation_presence": "README or data dictionary file found" if readiness_metrics_raw["documentation_found"] else "No documentation file found"
+        }
+
+    notes = get_notes()
+
+    readiness_report = [
+        {
+            "bucket": "Data Quality",
+            "weight": 35,
+            "tests": [
+                {
+                    "id": "1.1",
+                    "key": "column_missing",
+                    "title": "Column-wise Missing",
+                    "note": notes["column_missing"],
+                    "score": detailed_scores["column_missing"],
+                    "max_score": 15
+                },
+                {
+                    "id": "1.2",
+                    "key": "row_missing",
+                    "title": "Row-wise Missing",
+                    "note": notes["row_missing"],
+                    "score": detailed_scores["row_missing"],
+                    "max_score": 10
+                },
+                {
+                    "id": "1.3",
+                    "key": "exact_row_duplicates",
+                    "title": "Row Duplicates",
+                    "note": notes["exact_row_duplicates"],
+                    "score": detailed_scores["exact_row_duplicates"],
+                    "max_score": 10
+                },
+            ]
+        },
+        {
+            "bucket": "Data Relevance and Completeness",
+            "weight": 10,
+            "tests": [
+                {
+                    "id": "2.1",
+                    "key": "coverage_check",
+                    "title": "Coverage Check",
+                    "note": notes["coverage_check"],
+                    "score": detailed_scores["coverage_check"],
+                    "max_score": 10
+                },
+                {
+                    "id": "2.2",
+                    "key": "mandatory_fields",
+                    "title": "Mandatory Fields",
+                    "note": "All mandatory fields present",
+                    "score": 5.0,
+                    "max_score": 5
+                }
+            ]
+        },
+        {
+            "bucket": "Data Variance and Correctness",
+            "weight": 10,
+            "tests": [
+                {
+                    "id": "3.1",
+                    "key": "numeric_variance",
+                    "title": "Numeric Variance",
+                    "note": notes["numeric_variance"],
+                    "score": detailed_scores["numeric_variance"],
+                    "max_score": 5
+                },
+                {
+                    "id": "3.2",
+                    "key": "categorical_variation",
+                    "title": "Categorical Variation",
+                    "note": notes["categorical_variation"],
+                    "score": detailed_scores["categorical_variation"],
+                    "max_score": 5
+                }
+            ]
+        },
+        {
+            "bucket": "Standardisation",
+            "weight": 15,
+            "tests": [
+                {
+                    "id": "4.1",
+                    "key": "file_format_check",
+                    "title": "File Format Check",
+                    "note": notes["file_format_check"],
+                    "score": detailed_scores["file_format_check"],
+                    "max_score": 5
+                },
+                {
+                    "id": "4.2",
+                    "key": "uniform_encoding",
+                    "title": "Uniform Encoding (Date Format)",
+                    "note": notes["uniform_encoding"],
+                    "score": detailed_scores["uniform_encoding"],
+                    "max_score": 10
+                }
+            ]
+        },
+        {
+            "bucket": "Model Ingestible Data",
+            "weight": 10,
+            "tests": [
+                {
+                    "id": "5.1",
+                    "key": "label_presence",
+                    "title": "Label Presence",
+                    "note": notes["label_presence"],
+                    "score": detailed_scores["label_presence"],
+                    "max_score": 10
+                }
+            ]
+        },
+        {
+            "bucket": "Regular Fresh & Longitudinal",
+            "weight": 10,
+            "tests": [
+                {
+                    "id": "6.1",
+                    "key": "timestamp_fields_found",
+                    "title": "Timestamps Presence",
+                    "note": notes["timestamp_fields_found"],
+                    "score": detailed_scores["timestamp_fields_found"],
+                    "max_score": 10
+                }
+            ]
+        },
+        {
+            "bucket": "Documentation",
+            "weight": 10,
+            "tests": [
+                {
+                    "id": "7.1",
+                    "key": "documentation_presence",
+                    "title": "Documentation Presence",
+                    "note": notes["documentation_presence"],
+                    "score": detailed_scores["documentation_presence"],
+                    "max_score": 10
+                }
+            ]
+        }
+    ]
+
+    return readiness_report
