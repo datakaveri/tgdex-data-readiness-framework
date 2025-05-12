@@ -3,6 +3,18 @@ import json
 
 class PDFReport(FPDF):
     def __init__(self, dataset_name, total_score, logo_path=None):
+        """
+        Constructor for PDFReport
+
+        Parameters
+        ----------
+        dataset_name : str
+            Name of the dataset
+        total_score : float
+            Total score of the dataset
+        logo_path : str, optional
+            Path to the logo to be displayed on the top left of the report, by default None
+        """
         super().__init__()
         self.dataset_name = dataset_name
         self.total_score = total_score
@@ -29,6 +41,15 @@ class PDFReport(FPDF):
         # self.ln(5)
 
     def render_table(self, data):
+        """
+        Render the table of data readiness checks from the given data.
+
+        Parameters
+        ----------
+        data : list
+            List of sections, each containing a bucket name, weight, and a list of tests.
+            Each test is a dictionary with keys 'id', 'title', 'note', 'score', and 'max_score'.
+        """
         col_widths = [20, 60, 90, 13, 12]
         headers = ['Test ID', 'Test Description', 'Data Readiness Check Summary Notes', 'Score', 'Max']
 
@@ -60,6 +81,27 @@ class PDFReport(FPDF):
                 self.ln()
 
 def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, logo_path=None):
+    """
+    Generates a PDF report from a JSON file containing readiness data.
+
+    Parameters
+    ----------
+    json_path : str
+        The path to the JSON file containing the readiness data.
+    output_path : str
+        The path where the generated PDF report will be saved.
+    dataset_name : str
+        The name of the dataset for which the report is generated.
+    total_score : float
+        The overall readiness score of the dataset.
+    logo_path : str, optional
+        The path to the logo image to be included in the report header (default is None).
+
+    Returns
+    -------
+    None
+    """
+
     with open(json_path, "r") as f:
         data = json.load(f)
 

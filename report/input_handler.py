@@ -4,6 +4,22 @@ from report.pdf_writer import generate_pdf_from_json
 
 def load_data_from_directory(directory):
     # Assuming the directory contains only CSV, Parquet and JSON files
+    """
+    Load and return data from CSV, Parquet, and JSON files in a specified directory.
+
+    Parameters
+    ----------
+    directory : str
+        The path to the directory containing the data files.
+
+    Returns
+    -------
+    list of tuples
+        A list of tuples, each containing a pandas DataFrame and the file path 
+        for each loaded file. Only files with extensions '.csv', '.parquet', 
+        and '.json' (excluding those containing 'metadata' in their name) are processed.
+    """
+
     csv_files = [file for file in os.listdir(directory) if file.endswith('.csv')]
     parquet_files = [file for file in os.listdir(directory) if file.endswith('.parquet')]
     json_files = [file for file in os.listdir(directory) if file.endswith('.json') and 'metadata' not in file]

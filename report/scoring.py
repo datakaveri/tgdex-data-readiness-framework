@@ -1,4 +1,19 @@
 def compute_aggregate_score(report_dict, df):
+    """
+    Computes the aggregate score from a dictionary of individual metrics.
+
+    Parameters
+    ----------
+    report_dict : dict
+        A dictionary of individual metrics, each with a score out of 100
+    df : pandas.DataFrame
+        The DataFrame containing the dataset
+
+    Returns
+    -------
+    final_report : dict
+        A dictionary with the total score and detailed scores for each metric
+    """
     total_score = 0
     detailed_scores = {}
 

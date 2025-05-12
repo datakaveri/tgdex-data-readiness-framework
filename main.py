@@ -6,6 +6,18 @@ import json, os
 from report.pdf_writer import generate_pdf_from_json
 
 def main():
+    """
+    Main function to run the entire data readiness report pipeline.
+
+    This function will:
+
+    1. Ask the user for a directory containing data files.
+    2. Load all the data files in the directory.
+    3. Run the raw readiness report for each file.
+    4. Compute the aggregate score for each file.
+    5. Write the raw and final reports to JSON files.
+    6. Generate a PDF report for each file.
+    """
     directory = input("Enter the directory containing data files: ")
 
     try:
