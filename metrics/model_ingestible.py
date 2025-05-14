@@ -1,4 +1,4 @@
-def check_label_presence(df):
+def check_label_presence(df, imputed_columns=None):
     """
     Check if a label column is present in the dataframe and has non-null values.
 
@@ -6,8 +6,8 @@ def check_label_presence(df):
     ----------
     df : pandas.DataFrame
         The dataframe to check.
-    metadata : dict
-        A dictionary containing the label column name.
+    imputed_columns : dict, optional
+        A dictionary containing the imputed column names and their inferred types.
 
     Returns
     -------
@@ -16,15 +16,9 @@ def check_label_presence(df):
         percentage of rows with non-null values in the label column if the label 
         column is present, otherwise "Missing or empty".
     """
-    label_cols = [col for col in df.columns if "label" in col.lower()]
-    if len(label_cols) == 1:
-        label_col = label_cols[0]
+    label_col = imputed_columns.get("label")
+    if label_col and label_col in df.columns:
         non_null_percentage = df[label_col].notnull().mean() * 100
-        return {"label_presence": f"{non_null_percentage:.2f}"}
-    return {"label_presence": None}
+        return {"label_presence_count": f"{non_null_percentage:.2f}", "label_column": label_col}
+    return {"label_presence_count": "None", "label_column": "Label column not found"}
 
-    # label_col = metadata.get("label_column")
-    # if label_col and label_col in df.columns:
-    #     non_null_percentage = df[label_col].notnull().mean() * 100
-    #     return {"label_presence": f"{non_null_percentage:.2f}%"}
-    # return {"label_presence": None}

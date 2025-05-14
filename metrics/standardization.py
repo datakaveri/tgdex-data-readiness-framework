@@ -21,59 +21,44 @@ def check_file_format(directory):
 
     valid_formats = ['.csv', '.json', '.parquet']
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-    return {"file_format": "Valid" if any(any(f.endswith(fmt) for fmt in valid_formats) for f in files) else "Invalid"}
+    return {"file_format": "valid" if any(any(f.endswith(fmt) for fmt in valid_formats) for f in files) else "invalid"}
 
 
-def check_date_format(df):
+def check_date_format(df, imputed_columns=None):
     """
-    Check the date format of columns in a DataFrame.
+    Validates date columns against the expected format specified in imputed_columns.
 
     Parameters
     ----------
+    imputed_columns : dict
+        Should contain 'date' with 'column' (list of col names) and 'format' (strftime format).
     df : pandas.DataFrame
-        DataFrame to check.
+        The dataframe to validate.
 
     Returns
     -------
     dict
-        A dictionary with a single key "date_format_issues" and a value of a
-        list of strings, where each string is the name of a column in the
-        DataFrame whose date format is not valid.
+        Column names mapped to percentage of invalid entries.
     """
-    date_format_issues = []
-    date_patterns = {
-        "%Y-%m-%d": re.compile(r"\d{4}-\d{2}-\d{2}"),
-        "%d/%m/%Y": re.compile(r"\d{2}/\d{2}/\d{4}"),
-        "%m-%d-%Y": re.compile(r"\d{2}-\d{2}-\d{4}"),
-        "%Y-%m-%dT%H:%M:%S%z": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+\d{2}:\d{2}"),
-        "%Y-%m-%dT%H:%M:%S.%f%z": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}\+\d{2}:\d{2}"),
-        "%Y-%m-%dT%H:%M:%SZ": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z"),
-        "%Y-%m-%dT%H:%M:%S": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"),
-        "%Y-%m-%dT%H:%M:%S.%f": re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}"),
-        "%m/%d/%Y %H:%M:%S": re.compile(r"\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2}"),
-        "%m/%d/%Y %H:%M:%S %z": re.compile(r"\d{1,2}/\d{1,2}/\d{4} \d{1,2}:\d{2}:\d{2} [+-]\d{4}"),
-    }
-    
-    for col in df.select_dtypes(include=['datetime64']).columns:
-        sample = df[col].dropna()
-        if sample.shape[0] > 100000:
-            sample = sample.head(100)
-        
-        for date_format, pattern in date_patterns.items():
-            if all(pattern.match(val.strftime(date_format)) for val in sample):
-                break
-        else:
-            try:
-                pd.to_datetime(sample, errors='raise')
-            except:
-                date_format_issues.append(col)
-    
-    if date_format_issues:
-        return {
-            "date_format_issues": date_format_issues,
-            "date_format_issues_count": len(date_format_issues),
-            "date_format_issues_percentage": round(len(date_format_issues) / df.shape[0] * 100, 2)
-        }
-    else:
-        return {"date_format_issues": None}
+    date_info = imputed_columns.get("date", {})
+    columns_to_validate = date_info.get("column", [])
+    expected_date_format = date_info.get("format")
+
+    if not expected_date_format or not columns_to_validate:
+        return {"date_column": "No columns or format specified", "date_issues_percentage": 'None'}
+
+    date_fields_found = []
+    date_issues_percentage = {}
+    for col in columns_to_validate:
+        if col not in df.columns:
+            continue
+        date_fields_found.append(col)
+        try:
+            parsed = pd.to_datetime(df[col], format=expected_date_format, errors="coerce")
+            mismatch_pct = round(parsed.isna().mean() * 100, 2)
+            date_issues_percentage[col] = mismatch_pct
+        except Exception:
+            continue
+    return {"date_column": date_fields_found, 
+            "date_issues_percentage": date_issues_percentage}
 
