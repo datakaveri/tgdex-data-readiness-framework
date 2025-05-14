@@ -7,7 +7,7 @@ from metrics.regular_refresh import *
 from metrics.documentation import *
 import json 
 
-def generate_raw_report(df, descriptor_path, data_directory):
+def generate_raw_report(df, descriptor_path, data_directory, imputed_columns=None):
     """
     Generate a raw data quality report from a given dataframe, descriptor path, and data directory.
 
@@ -29,14 +29,14 @@ def generate_raw_report(df, descriptor_path, data_directory):
     report.update(check_column_missing(df))
     report.update(check_row_missing(df))
     report.update(check_row_duplicates(df))
-    report.update(check_coverage_region(df))
+    report.update(check_coverage_region(df, imputed_columns))
     report.update(check_numeric_variance(df))
     report.update(check_categorical_variation(df))
     report.update(check_file_format(data_directory))
-    report.update(check_date_format(df))
-    report.update(check_label_presence(df))
-    report.update(check_timestamp_fields(df))
-    report.update(check_documentation_presence(descriptor_path))
+    report.update(check_date_format(df, imputed_columns))
+    report.update(check_label_presence(df, imputed_columns))
+    report.update(check_timestamp_fields(df, imputed_columns))
+    report.update(check_documentation_presence(data_directory))
     return report
 
 def generate_final_report(readiness_metrics_json_path):
@@ -58,7 +58,6 @@ def generate_final_report(readiness_metrics_json_path):
     detailed_scores = readiness_metrics_raw["detailed_scores"]
 
     # Notes are constructed using raw metrics from the report
-    # TODO: Fix dynamic generation of notes
     def get_notes():
         """
         Construct a dictionary of notes for the final readiness report based on raw report metrics.
@@ -72,16 +71,26 @@ def generate_final_report(readiness_metrics_json_path):
             A dictionary with keys matching the raw report metrics and values as strings containing the notes.
         """
         return {
-            "column_missing": f"{readiness_metrics_raw['column_missing_count']} of all columns exceed 30% missing threshold",
-            "row_missing": f"{readiness_metrics_raw['row_missing_count']} out of rows exceed 50% missing threshold",
+            "column_missing": f"{readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns exceed the 30% allowable threshold",
+            
+            "row_missing": f"{readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows exceed the 50% allowable threshold",
+
             "exact_row_duplicates": f"{readiness_metrics_raw['exact_row_duplicates']} duplicate rows found",
-            "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values present in '{readiness_metrics_raw['region_column']}' column", 
-            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have sufficient variance",
-            "categorical_variation": f"{len(readiness_metrics_raw['dominant_categorical_columns'])} out of {(readiness_metrics_raw['number_of_categorical_columns'])} categorical columns pass variation check",
-            "file_format_check": f"File format {readiness_metrics_raw['file_format'].lower()} is allowed",
-            "uniform_encoding": f"Date column {readiness_metrics_raw.get('date_column', 'not found')} not found",
-            "label_presence": f"Label column {readiness_metrics_raw.get('label_column', 'not checked')} is present and valid",
+            
+            "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values present in '{readiness_metrics_raw['region_column']}' column" if readiness_metrics_raw['region_coverage'] != "None" else "No region column found", 
+            
+            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have insufficient standard deviation",
+            
+            "categorical_variation": f"{len(readiness_metrics_raw['dominant_categorical_columns'])} out of {(readiness_metrics_raw['number_of_categorical_columns'])} categorical columns have dominant categories",
+            
+            "file_format_check": f"File format is {readiness_metrics_raw['file_format'].lower()}",
+            
+            "uniform_encoding": f"{readiness_metrics_raw['date_issues_percentage']} issues found in ({readiness_metrics_raw['date_column']}) column" if readiness_metrics_raw['date_issues_percentage'] != "None" else "No date column found",
+            
+            "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in {readiness_metrics_raw['label_column']} column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
+            
             "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No valid timestamp fields found",
+            
             "documentation_presence": "README or data dictionary file found" if readiness_metrics_raw["documentation_found"] else "No documentation file found"
         }
 
@@ -169,7 +178,7 @@ def generate_final_report(readiness_metrics_json_path):
                 {
                     "id": "4.2",
                     "key": "uniform_encoding",
-                    "title": "Uniform Encoding (Date Format)",
+                    "title": "Uniform Encoding of Dates",
                     "note": notes["uniform_encoding"],
                     "score": detailed_scores["uniform_encoding"],
                     "max_score": 10
@@ -191,7 +200,7 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Regular Fresh & Longitudinal",
+            "bucket": "Regular Refresh",
             "weight": 10,
             "tests": [
                 {

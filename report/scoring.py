@@ -63,11 +63,11 @@ def compute_aggregate_score(report_dict, df):
     if "region_coverage" in report_dict:
         missing_percentage = report_dict["region_coverage"]
         region_column = report_dict["region_column"]
-        score = max(0, weights["coverage_check"] * (1 - missing_percentage / 100))
-        detailed_scores["coverage_check"] = {
-            "score": round(score, 2),
-            "region_column": region_column
-        }
+        if missing_percentage == 'None':
+            score = weights["coverage_check"]
+        else:
+            score = max(0, weights["coverage_check"] * (1 - missing_percentage / 100))
+        detailed_scores["coverage_check"] = round(score, 2)
         total_score += score
 
     # 5. Numeric Variance (low-variance columns)
@@ -92,37 +92,39 @@ def compute_aggregate_score(report_dict, df):
 
     # 7. File Format Check (Boolean)
     if "file_format" in report_dict:
-        score = weights["file_format_check"] if report_dict["file_format"] == "Valid" else 0
+        score = weights["file_format_check"] if report_dict["file_format"] == "valid" else 0
 
         detailed_scores["file_format_check"] = score
         total_score += score
 
     # 8. Uniform Encoding / Date Format
-    if "date_format_issues" in report_dict:
-        if report_dict["date_format_issues"] is not None:
-            total = report_dict["date_format_issues_count"]
-            if total > 0:
-                prop = len(report_dict["date_format_issues"]) / total * 100
-                score = max(0, weights["uniform_encoding"] * (1 - prop / 100))
+    if "date_issues_percentage" in report_dict:
+        if report_dict["date_issues_percentage"] != "None":
+            prop = report_dict["date_issues_percentage"]
+            score = max(0, weights["uniform_encoding"] * (1 - prop / 100))
         else:
             score = weights["uniform_encoding"]
         detailed_scores["uniform_encoding"] = round(score, 2)
         total_score += score
 
     # 9. Label Presence (Boolean)
-    if "label_presence" in report_dict:
-        if report_dict["label_presence"] == None:
+    if "label_presence_count" in report_dict:
+        if report_dict["label_presence_count"] == 'None':
             score = weights["label_presence"]
         else:
-            non_null_percentage = float(report_dict["label_presence"])
+            non_null_percentage = float(report_dict["label_presence_count"])
             score = max(0, weights["label_presence"] * non_null_percentage / 100)
         detailed_scores["label_presence"] = round(score, 2)
         total_score += score
 
     # 10. Timestamps Presence (Boolean)
     if "timestamp_fields_found" in report_dict:
-        score = 0 if report_dict["timestamp_fields_found"] == [] else weights["timestamp_fields_found"]
-        detailed_scores["timestamp_fields_found"] = score
+        if report_dict["timestamp_fields_found"] == 'None':
+            score = weights["timestamp_fields_found"]
+        else:
+            prop = report_dict["timestamp_issues_percentage"]
+            score = max(0, weights["timestamp_issues_percentage"] * (1 - prop / 100))
+        detailed_scores["timestamp_fields_found"] = round(score, 2)
         total_score += score
 
     # 11. Documentation Presence (Boolean)

@@ -1,4 +1,4 @@
-def check_column_missing(df, threshold=0.0):
+def check_column_missing(df, threshold=0.3):
     """
     Check which columns have missing values above a certain threshold.
 
@@ -7,7 +7,7 @@ def check_column_missing(df, threshold=0.0):
     df : pandas.DataFrame
         DataFrame to check for missing values.
     threshold : float, optional
-        Minimum proportion of missing values in a column to report. Defaults to 0.0.
+        Minimum proportion of missing values in a column to report. Defaults to 0.3.
 
     Returns
     -------
@@ -30,13 +30,15 @@ def check_column_missing(df, threshold=0.0):
     if not missing_report:
         return {"column_missing": {},
                 "column_missing_count": 0,
-                "column_missing_percentage": 0.0}
+                "column_missing_percentage": 0.0,
+                "number_of_columns": df.shape[1]}
     else:
         return {"column_missing": missing_report,
                 "column_missing_count": len(missing_report),
-                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 2)}
+                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 2),
+                "number_of_columns": df.shape[1]}
 
-def check_row_missing(df, threshold=0.0):
+def check_row_missing(df, threshold=0.5):
     """
     Check which rows have missing values above a certain threshold.
 
@@ -59,7 +61,8 @@ def check_row_missing(df, threshold=0.0):
     count = df[df.isnull().mean(axis=1) > threshold].shape[0]
     percentage = round(count / df.shape[0] * 100, 2) if count > 0 else 0.0
     return {"row_missing_count": count,
-            "row_missing_percentage": percentage}
+            "row_missing_percentage": percentage,
+            "number_of_rows": df.shape[0]}
 
 def check_row_duplicates(df):
     """
@@ -82,3 +85,4 @@ def check_row_duplicates(df):
     percentage = round(df.duplicated().mean() * 100, 2) if count > 0 else 0.0
     return {"exact_row_duplicates": count,
             "exact_row_duplicates_percentage": percentage}  
+
