@@ -1,5 +1,6 @@
 from fpdf import FPDF
 import json
+import datetime
 
 class PDFReport(FPDF):
     def __init__(self, dataset_name, total_score, logo_path=None):
@@ -21,21 +22,26 @@ class PDFReport(FPDF):
         self.logo_path = logo_path
         self.set_auto_page_break(auto=True, margin=15)
         self.add_page()
-        self.set_font("Arial", size=10)
+        self.set_font("Helvetica", size=10)
 
     def header(self):
         if self.logo_path:
-            self.image(self.logo_path, 10, 8, 20)  # Logo at top-left, width = 20
+            self.image(self.logo_path, 10, 5, 25)  # Logo at top-left, width = 20
 
-        self.set_font("Arial", 'B', 14)
-        self.set_xy(5, 10)
+        self.set_font("Helvetica", 'B', 16)
+        self.set_xy(15, 10)
         self.cell(0, 10, 'Data Readiness Report', ln=True, align='C')
 
-        self.set_font("Arial", '', 11)
-        self.set_xy(10,25)
-        self.cell(0, 10, f"Dataset: {self.dataset_name}", ln=True, align='L')
-        self.set_xy(160,25)
-        self.set_font("Arial", 'B', 12)
+        self.set_font("Helvetica", '', 12)
+        self.set_xy(9, 30)
+        self.cell(0, 10, f"Dataset Name: {self.dataset_name}", ln=True, align='L')
+
+        self.set_font("Helvetica", '', 12)
+        self.set_xy(9, 35)
+        self.cell(0, 10, f"Report generated on: {datetime.datetime.now().strftime('%d-%b-%Y')}", ln=True, align='L')
+
+        self.set_font("Helvetica", 'B', 12)
+        self.set_xy(160, 35)
         self.cell(0, 10, f"Overall Score: {self.total_score:.2f}%", ln=True, align='L')
 
         # self.ln(5)
@@ -50,22 +56,27 @@ class PDFReport(FPDF):
             List of sections, each containing a bucket name, weight, and a list of tests.
             Each test is a dictionary with keys 'id', 'title', 'note', 'score', and 'max_score'.
         """
-        col_widths = [20, 60, 90, 13, 12]
-        headers = ['Test ID', 'Test Description', 'Data Readiness Check Summary Notes', 'Score', 'Max']
+        col_widths = [15, 40, 115, 13, 12]
+        headers = [' Test ID', '       Test Description', '                                              Summary of Findings', ' Score', ' Max']
 
         # Table headers
-        self.set_font("Arial", 'B', 9)
+        self.set_font("Helvetica", 'B', 9)
         for i, header in enumerate(headers):
             self.cell(col_widths[i], 10, header, border=1)
         self.ln()
 
-        self.set_font("Arial", '', 9)
+        self.set_font("Helvetica", '', 9)
         for section in data:
             # Bucket heading
-            self.set_font("Arial", 'B', 10)
-            self.cell(sum(col_widths), 8, f"{section['bucket']} ({section['weight']}%)", ln=True, border=1)
-            self.set_font("Arial", '', 9)
+            self.set_fill_color(200, 240, 200)  # Light green
+            self.set_text_color(0, 0, 0)  # Black text
+            self.set_font("Helvetica", 'B', 10)
+            self.cell(sum(col_widths), 8, f"{section['bucket']} ({section['weight']}%)", ln=True, fill=True, border=1)
+            self.set_fill_color(255, 255, 255)  # White background
+            self.set_text_color(0, 0, 0)  # Black text
+            self.set_font("Helvetica", '', 9)
 
+            # Render each test
             for test in section['tests']:
                 self.cell(col_widths[0], 8, test['id'], border=1)
                 self.cell(col_widths[1], 8, test['title'], border=1)
@@ -79,6 +90,14 @@ class PDFReport(FPDF):
                 self.cell(col_widths[3], height, f"{test['score']:.2f}", border=1, align='C')
                 self.cell(col_widths[4], height, f"{test['max_score']:.0f}", border=1, align='C')
                 self.ln()
+
+            # Total score for each bucket
+            self.set_font("Helvetica", 'B', 10)
+            self.set_fill_color(200, 211, 211)  # Light gray
+            self.cell(col_widths[0]+col_widths[1]+col_widths[2], 8, f"Subtotal", border=1, fill=True)
+            self.cell(col_widths[3], 8, f"{sum(test['score'] for test in section['tests']):.2f}", border=1, align='C', fill=True)
+            self.cell(col_widths[4], 8, f"{sum(test['max_score'] for test in section['tests']):.0f}", border=1, align='C', fill=True)
+            self.ln()
 
 def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, logo_path=None):
     """
