@@ -36,7 +36,7 @@ def main():
             imputed_columns = infer_column_roles_openai(df, api_key)
             # For testing purposes, take the imputed_columns from a json file titled llm_output.json
             # with open('tests/LLM_output.json', 'r') as f:
-            imputed_columns = json.load(f)
+            # imputed_columns = json.load(f)
             # Generate the raw readiness report
             init_report = generate_raw_report(df, file_path, ''+directory, imputed_columns)
             # Compute the aggregate score
