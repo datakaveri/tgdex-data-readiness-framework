@@ -42,23 +42,26 @@ def check_date_format(df, imputed_columns=None):
     """
     date_info = imputed_columns.get("date", {})
     columns_to_validate = date_info.get("column", [])
-    expected_date_format = date_info.get("format")
+    expected_date_format = date_info.get("format", [])
 
     if not expected_date_format or not columns_to_validate:
         return {"date_column": "No columns or format specified", "date_issues_percentage": 'None'}
 
     date_fields_found = []
-    date_issues_percentage = {}
+    date_issues_count = 0
+    total_entries = 0
+    if isinstance(columns_to_validate, str):
+        columns_to_validate = [columns_to_validate]
     for col in columns_to_validate:
         if col not in df.columns:
             continue
         date_fields_found.append(col)
         try:
             parsed = pd.to_datetime(df[col], format=expected_date_format, errors="coerce")
-            mismatch_pct = round(parsed.isna().mean() * 100, 2)
-            date_issues_percentage[col] = mismatch_pct
+            date_issues_count += parsed.isna().sum()
+            total_entries += len(parsed)
         except Exception:
             continue
     return {"date_column": date_fields_found, 
-            "date_issues_percentage": date_issues_percentage}
+            "date_issues_percentage": round(date_issues_count / total_entries * 100, 2) if total_entries > 0 else 0.0}
 
