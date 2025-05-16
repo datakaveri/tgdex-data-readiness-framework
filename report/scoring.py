@@ -35,8 +35,10 @@ def compute_aggregate_score(report_dict, df):
     # 1. Column-wise Missing (score decreases as missing % increases)
     if "column_missing" in report_dict:
         cols = report_dict["column_missing"]
-        if cols:
-            avg_missing = sum(cols.values()) / len(cols)
+        if "column_missing_count" in report_dict and "number_of_columns" in report_dict:
+            missing_cols = report_dict["column_missing_count"]
+            total_cols = report_dict["number_of_columns"]
+            avg_missing = (missing_cols / total_cols) * 100
             score = max(0, weights["column_missing"] * (1 - avg_missing / 100))
         else:
             score = weights["column_missing"]
