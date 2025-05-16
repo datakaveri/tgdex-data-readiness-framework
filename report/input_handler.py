@@ -20,10 +20,23 @@ def load_data_from_directory(directory):
         for each loaded file. Only files with extensions '.csv', '.parquet', 
         and '.json' (excluding those containing 'metadata' in their name) are processed.
     """
-
     
     data = []
+    files = [file for file in os.listdir(directory) if file.endswith(('.csv', '.parquet', '.json')) and 'metadata' not in file]
     subdirectories = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
+    
+    for file in files:
+        file_path = os.path.join(directory, file)
+        if file.endswith('.csv'):
+            with open(file_path, 'rb') as f:
+                result = chardet.detect(f.read())  # or readline if the file is large
+            df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+        elif file.endswith('.parquet'):
+            df = pd.read_parquet(file_path)
+        elif file.endswith('.json'):
+            df = pd.read_json(file_path)
+        data.append((df, file_path))
+    
     for subdirectory in subdirectories:
         subdirectory_path = os.path.join(directory, subdirectory)
         csv_files = [file for file in os.listdir(subdirectory_path) if file.endswith('.csv')]
@@ -43,3 +56,4 @@ def load_data_from_directory(directory):
             data.append((df, file_path))
     
     return data
+
