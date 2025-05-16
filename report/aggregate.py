@@ -85,9 +85,9 @@ def generate_final_report(readiness_metrics_json_path):
             
             "file_format_check": f"File format is {readiness_metrics_raw['file_format'].lower()}",
             
-            "uniform_encoding": f"{readiness_metrics_raw['date_issues_percentage']} issues found in ({readiness_metrics_raw['date_column']}) column" if readiness_metrics_raw['date_issues_percentage'] != "None" else "No date column found",
+            "uniform_encoding": f"{readiness_metrics_raw['date_issues_percentage']} issues found in '{readiness_metrics_raw['date_column']}' column" if readiness_metrics_raw['date_issues_percentage'] != "None" else "No date column found",
             
-            "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in {readiness_metrics_raw['label_column']} column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
+            "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in '{readiness_metrics_raw['label_column']}' column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
             
             "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No valid timestamp fields found",
             
