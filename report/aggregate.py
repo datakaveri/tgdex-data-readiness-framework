@@ -7,7 +7,7 @@ from metrics.regular_refresh import *
 from metrics.documentation import *
 import json 
 
-def generate_raw_report(df, descriptor_path, data_directory, imputed_columns=None):
+def generate_raw_report(df, data_file_path, imputed_columns=None):
     """
     Generate a raw data quality report from a given dataframe, descriptor path, and data directory.
 
@@ -32,11 +32,11 @@ def generate_raw_report(df, descriptor_path, data_directory, imputed_columns=Non
     report.update(check_coverage_region(df, imputed_columns))
     report.update(check_numeric_variance(df))
     report.update(check_categorical_variation(df))
-    report.update(check_file_format(data_directory))
+    report.update(check_file_format(data_file_path))
     report.update(check_date_format(df, imputed_columns))
     report.update(check_label_presence(df, imputed_columns))
     report.update(check_timestamp_fields(df, imputed_columns))
-    report.update(check_documentation_presence(data_directory))
+    report.update(check_documentation_presence(data_file_path))
     return report
 
 def generate_final_report(readiness_metrics_json_path):

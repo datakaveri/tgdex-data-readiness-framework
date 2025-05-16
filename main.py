@@ -32,7 +32,7 @@ def main():
         for df, file_path in data:
             # Get the dataset name from the file path, strip special characters
             dataset_name = os.path.splitext(os.path.basename(file_path))[0].replace('%20', ' ').replace('%21', '!').replace('%22', '"').replace('%23', '#').replace('%24', '$').replace('%25', '%').replace('%26', '&').replace('%27', "'").replace('%28', '(').replace('%29', ')').replace('%2A', '*').replace('%2B', '+').replace('%2C', ',').replace('%2D', '-').replace('%2E', '.').replace('%2F', '/').replace('%3A', ':').replace('%3B', ';').replace('%3C', '<').replace('%3D', '=').replace('%3E', '>').replace('%3F', '?').replace('%40', '@').replace('[', '(').replace(']', ')')
-            
+            file_path = os.path.dirname(file_path)
             # Use OpenAI to infer column roles
             imputed_columns = infer_column_roles_openai(df, api_key)
 
@@ -41,7 +41,7 @@ def main():
             #     imputed_columns = json.load(f)
             
             # Generate the raw readiness report
-            init_report = generate_raw_report(df, file_path, ''+directory, imputed_columns)
+            init_report = generate_raw_report(df, file_path, imputed_columns)
             
             # Compute the aggregate score
             final_score = scoring.compute_aggregate_score(init_report, df)
