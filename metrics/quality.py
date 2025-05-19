@@ -58,7 +58,7 @@ def check_row_missing(df, threshold=0.5):
         of rows in the DataFrame.
     """
 
-    count = df[df.isnull().mean(axis=1) > threshold].shape[0]
+    count = df[df.isnull().mean(axis=1) >= threshold].shape[0]
     percentage = round(count / df.shape[0] * 100, 2) if count > 0 else 0.0
     return {"row_missing_count": count,
             "row_missing_percentage": percentage,

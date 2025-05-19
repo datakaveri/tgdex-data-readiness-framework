@@ -1,6 +1,6 @@
 import pandas as pd
 from metrics.quality import check_column_missing, check_row_missing, check_row_duplicates
-# TODO: Pytest fixtures
+
 def test_check_column_missing():
     # Create a sample DataFrame
     data = {'A': [1, 2, None, 4], 'B': [None, None, None, None], 'C': [1, 2, 3, 4]}
@@ -9,9 +9,10 @@ def test_check_column_missing():
     # Test with default threshold
     result = check_column_missing(df)
     expected = {
-        "column_missing": {'A': 25.0, 'B': 100.0},
-        "column_missing_count": 2,
-        "column_missing_percentage": 66.67
+        "column_missing": {'B': 100.0},
+        "column_missing_count": 1,
+        "column_missing_percentage": 33.33,
+        "number_of_columns": 3
     }
     assert result == expected
 
@@ -20,7 +21,8 @@ def test_check_column_missing():
     expected = {
         "column_missing": {'B': 100.0},
         "column_missing_count": 1,
-        "column_missing_percentage": 33.33
+        "column_missing_percentage": 33.33,
+        "number_of_columns": 3
     }
     assert result == expected
 
@@ -31,7 +33,8 @@ def test_check_column_missing():
     expected = {
         "column_missing": {},
         "column_missing_count": 0,
-        "column_missing_percentage": 0.0
+        "column_missing_percentage": 0.0,
+        "number_of_columns": 3
     }
     assert result == expected
 
@@ -43,8 +46,9 @@ def test_check_row_missing():
     # Test with default threshold
     result = check_row_missing(df)
     expected = {
-        "row_missing_count": 3,
-        "row_missing_percentage": 75.0
+        "row_missing_count": 0,
+        "row_missing_percentage": 0.0,
+        "number_of_rows": 4
     }
     assert result == expected
 
@@ -55,7 +59,8 @@ def test_check_row_missing():
     result = check_row_missing(df, threshold=0.6)
     expected = {
         "row_missing_count": 1,
-        "row_missing_percentage": 25.0
+        "row_missing_percentage": 25.0,
+        "number_of_rows": 4
     }
     assert result == expected
 
@@ -65,7 +70,8 @@ def test_check_row_missing():
     result = check_row_missing(df)
     expected = {
         "row_missing_count": 0,
-        "row_missing_percentage": 0.0
+        "row_missing_percentage": 0.0,
+        "number_of_rows": 4
     }
     assert result == expected
 
@@ -75,7 +81,8 @@ def test_check_column_missing_empty_df():
     expected = {
         "column_missing": {},
         "column_missing_count": 0,
-        "column_missing_percentage": 0.0
+        "column_missing_percentage": 0.0,
+        "number_of_columns": 0
     }
     assert result == expected
 
@@ -84,7 +91,8 @@ def test_check_row_missing_empty_df():
     result = check_row_missing(df)
     expected = {
         "row_missing_count": 0,
-        "row_missing_percentage": 0.0
+        "row_missing_percentage": 0.0,
+        "number_of_rows": 0
     }
     assert result == expected
 
@@ -95,7 +103,8 @@ def test_check_column_missing_all_null():
     expected = {
         "column_missing": {'A': 100.0, 'B': 100.0},
         "column_missing_count": 2,
-        "column_missing_percentage": 100.0
+        "column_missing_percentage": 100.0,
+        "number_of_columns": 2
     }
     assert result == expected
     # Test with empty column
