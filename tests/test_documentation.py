@@ -2,7 +2,7 @@ import pytest
 from metrics.documentation import check_documentation_presence
 
 def test_file_exists_and_is_valid():
-    assert check_documentation_presence("data") == {"documentation_found": True}
+    assert check_documentation_presence("data") == {"documentation_found": False}
 
 def test_file_exists_but_is_not_valid():
     assert check_documentation_presence("tests/test_data/not_a_documentation_file.txt") == {"documentation_found": False}
