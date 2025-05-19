@@ -1,4 +1,4 @@
-def check_numeric_variance(df, std_threshold=0.1):
+def check_numeric_variance(df, cv_threshold=0.1):
 
     """
     This function takes a DataFrame and a threshold for standard deviation and 
@@ -19,8 +19,7 @@ def check_numeric_variance(df, std_threshold=0.1):
     numeric_cols = df.select_dtypes(include=['number'])
     if numeric_cols.empty:
         return None
-
-    low_variance_cols = [col for col in numeric_cols if df[col].std() < std_threshold]
+    low_variance_cols = [col for col in numeric_cols if df[col].std() / df[col].mean() < cv_threshold]
     return {
         "low_variance_numeric_columns": low_variance_cols,
         "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 2),
