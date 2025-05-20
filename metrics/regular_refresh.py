@@ -16,6 +16,9 @@ def check_timestamp_fields(df,imputed_columns=None):
     dict
         Column names mapped to percentage of invalid entries.
     """
+    if imputed_columns is None:
+        return {"timestamp_fields_found": 'None',
+            "timestamp_issues_percentage": 'None'}
     timestamp_info = imputed_columns.get("timestamp", {})
     timestamp_cols = timestamp_info.get("column", [])
     timestamp_format = timestamp_info.get("format")
