@@ -127,13 +127,3 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, lo
     pdf = PDFReport(dataset_name, total_score, logo_path)
     pdf.render_table(data)
     pdf.output(output_path)
-
-# raw_report_path = "outputReports/readiness_report.json"
-# json_input = "outputReports/final_readiness_report.json"
-# pdf_output = "outputReports/data_readiness_report.pdf"
-# dataset_name = "Hyderabad PCA 2011 Census"
-# with open(raw_report_path, "r") as f:
-#     data = json.load(f)
-# total_score = data["total_score"]
-# logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-

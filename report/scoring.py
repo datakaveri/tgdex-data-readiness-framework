@@ -27,7 +27,7 @@ def compute_aggregate_score(report_dict, df):
         "categorical_variation": 5,
         "file_format_check": 5,
         "uniform_encoding": 10,
-        "label_presence": 10,
+        # "label_presence": 10,
         "timestamp_fields_found": 10,
         "documentation_presence": 10,
     }
@@ -109,15 +109,15 @@ def compute_aggregate_score(report_dict, df):
         detailed_scores["uniform_encoding"] = round(score, 2)
         total_score += score
 
-    # 9. Label Presence (Boolean)
-    if "label_presence_count" in report_dict:
-        if report_dict["label_presence_count"] == 'None':
-            score = weights["label_presence"]
-        else:
-            non_null_percentage = float(report_dict["label_presence_count"])
-            score = max(0, weights["label_presence"] * non_null_percentage / 100)
-        detailed_scores["label_presence"] = round(score, 2)
-        total_score += score
+    # # 9. Label Presence (Boolean)
+    # if "label_presence_count" in report_dict:
+    #     if report_dict["label_presence_count"] == 'None':
+    #         score = weights["label_presence"]
+    #     else:
+    #         non_null_percentage = float(report_dict["label_presence_count"])
+    #         score = max(0, weights["label_presence"] * non_null_percentage / 100)
+    #     detailed_scores["label_presence"] = round(score, 2)
+    #     total_score += score
 
     # 10. Timestamps Presence (Boolean)
     if "timestamp_fields_found" in report_dict:

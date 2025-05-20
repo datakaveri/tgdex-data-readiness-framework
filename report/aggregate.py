@@ -34,7 +34,7 @@ def generate_raw_report(df, data_file_path, imputed_columns=None):
     report.update(check_categorical_variation(df))
     report.update(check_file_format(data_file_path))
     report.update(check_date_format(df, imputed_columns))
-    report.update(check_label_presence(df, imputed_columns))
+    # report.update(check_label_presence(df, imputed_columns))
     report.update(check_timestamp_fields(df, imputed_columns))
     report.update(check_documentation_presence(data_file_path))
     return report
@@ -79,7 +79,7 @@ def generate_final_report(readiness_metrics_json_path):
             
             "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values present in '{readiness_metrics_raw['region_column']}' column" if readiness_metrics_raw['region_coverage'] != "None" else "No region column found", 
             
-            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have insufficient standard deviation",
+            "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have low coefficient of variation",
             
             "categorical_variation": f"{len(readiness_metrics_raw['dominant_categorical_columns'])} out of {(readiness_metrics_raw['number_of_categorical_columns'])} categorical columns have dominant categories",
             
@@ -87,9 +87,9 @@ def generate_final_report(readiness_metrics_json_path):
             
             "uniform_encoding": f"{readiness_metrics_raw['date_issues_percentage']} issues found in '{readiness_metrics_raw['date_column']}' column" if readiness_metrics_raw['date_issues_percentage'] != "None" else "No date column found",
             
-            "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in '{readiness_metrics_raw['label_column']}' column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
+            # "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in '{readiness_metrics_raw['label_column']}' column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
             
-            "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No valid timestamp fields found",
+            "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No timestamp fields found",
             
             "documentation_presence": "README or data dictionary file found" if readiness_metrics_raw["documentation_found"] else "No documentation file found"
         }
@@ -185,26 +185,26 @@ def generate_final_report(readiness_metrics_json_path):
                 }
             ]
         },
-        {
-            "bucket": "Model Ingestible Data",
-            "weight": 10,
-            "tests": [
-                {
-                    "id": "5.1",
-                    "key": "label_presence",
-                    "title": "Label Presence",
-                    "note": notes["label_presence"],
-                    "score": detailed_scores["label_presence"],
-                    "max_score": 10
-                }
-            ]
-        },
+        # {
+        #     "bucket": "Model Ingestible Data",
+        #     "weight": 10,
+        #     "tests": [
+        #         {
+        #             "id": "5.1",
+        #             "key": "label_presence",
+        #             "title": "Label Presence",
+        #             "note": notes["label_presence"],
+        #             "score": detailed_scores["label_presence"],
+        #             "max_score": 10
+        #         }
+        #     ]
+        # },
         {
             "bucket": "Regular Refresh",
             "weight": 10,
             "tests": [
                 {
-                    "id": "6.1",
+                    "id": "5.1",
                     "key": "timestamp_fields_found",
                     "title": "Timestamps Presence",
                     "note": notes["timestamp_fields_found"],
@@ -218,7 +218,7 @@ def generate_final_report(readiness_metrics_json_path):
             "weight": 10,
             "tests": [
                 {
-                    "id": "7.1",
+                    "id": "6.1",
                     "key": "documentation_presence",
                     "title": "Documentation Presence",
                     "note": notes["documentation_presence"],
