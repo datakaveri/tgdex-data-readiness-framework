@@ -45,7 +45,7 @@ def infer_column_roles_openai(df, api_key):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=0.2
+        temperature=0
     )
 
     message_content = response.choices[0].message.content
