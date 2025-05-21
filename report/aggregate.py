@@ -76,7 +76,7 @@ def generate_final_report(readiness_metrics_json_path):
 
             "exact_row_duplicates": f"{readiness_metrics_raw['exact_row_duplicates']} duplicate rows found",
             
-            "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values present in '{readiness_metrics_raw['region_column']}' column" if readiness_metrics_raw['region_coverage'] != "None" else "No region column found", 
+            "coverage_check": f"{readiness_metrics_raw['region_coverage']:.2f}% values missing in {len(readiness_metrics_raw['region_column']) if len(readiness_metrics_raw['region_column']) > 1 else readiness_metrics_raw['region_column'][0]} region column(s)" if readiness_metrics_raw['region_coverage'] != "None" else "No region column found", 
             
             "numeric_variance": f"{len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {(readiness_metrics_raw['number_of_numeric_columns'])} numeric columns have low coefficient of variation",
             
@@ -125,7 +125,7 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Data Relevance and Completeness (Not Applicable)" if notes["coverage_check"] == "No region column found" else "Data Relevance and Completeness",
+            "bucket": "Data Relevance and Completeness",
             "weight": 0 if notes["coverage_check"] == "No region column found" else 10,
             "tests": [
                 {
@@ -161,7 +161,7 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Standardisation (Uniform Encoding of Dates Not Applicable)" if notes["uniform_encoding"] == "No date column found" else "Standardisation",
+            "bucket": "Standardisation",
             "weight": 10 if notes["uniform_encoding"] == "No date column found" else 20,
             "tests": [
                 {
@@ -183,7 +183,7 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Regular Refresh (Not Applicable)" if notes["timestamp_fields_found"] == "No timestamp fields found" else "Regular Refresh",
+            "bucket": "Regular Refresh",
             "weight": 0 if notes["timestamp_fields_found"] == "No timestamp fields found" else 10,
             "tests": [
                 {
