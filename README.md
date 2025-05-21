@@ -10,8 +10,7 @@
 | coverage_check         | 10     | Decreases with % missing region coverage       |
 | numeric_variance       | 5      | Decreases with % low-variance numeric columns  |
 | categorical_variation  | 5      | Decreases with % dominated categorical columns |
-| file_format_check      | 5      | Full points if valid, else 0                   |
+| file_format_check      | 10     | Full points if valid, else 0                   |
 | uniform_encoding       | 10     | Decreases with % date/encoding issues          |
-| label_presence         | 10     | Proportional to % non-null label presence      |
 | timestamp_fields_found | 10     | Decreases with % timestamp issues              |
-| documentation_presence | 10     | Full points if present, else 0                 |
+| documentation_presence | 15     | Full points if present, else 0                 |
