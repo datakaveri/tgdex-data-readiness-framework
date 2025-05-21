@@ -35,7 +35,7 @@ class PDFReport(FPDF):
         self.cell(0, 10, 'Data Readiness Report', ln=True, align='C')
 
         self.set_font("Helvetica", '', 12)
-        self.set_xy(9, 30)
+        self.set_xy(9, 25)
         self.cell(0, 10, f"Dataset Name: {self.dataset_name}", ln=True, align='L')
 
         self.set_font("Helvetica", '', 12)
@@ -94,8 +94,13 @@ class PDFReport(FPDF):
                 height = self.get_y() - y
                 self.set_xy(x + col_widths[2], y)
 
-                self.cell(col_widths[3], height, f"{test['score']:.2f}", border=1, align='C')
-                self.cell(col_widths[4], height, f"{test['max_score']:.0f}", border=1, align='C')
+                if test['max_score'] == 0:
+                    self.set_fill_color(255, 200, 200)  # Light red if max_score is 0
+                else:
+                    self.set_fill_color(255, 255, 255)  # White background
+
+                self.cell(col_widths[3], height, f"{test['score']:.2f}", border=1, align='C', fill=True)
+                self.cell(col_widths[4], height, f"{test['max_score']:.0f}", border=1, align='C', fill=True)
                 self.ln()
 
             # Total score for each bucket
