@@ -34,7 +34,6 @@ def generate_raw_report(df, data_file_path, imputed_columns=None):
     report.update(check_categorical_variation(df))
     report.update(check_file_format(data_file_path))
     report.update(check_date_format(df, imputed_columns))
-    # report.update(check_label_presence(df, imputed_columns))
     report.update(check_timestamp_fields(df, imputed_columns))
     report.update(check_documentation_presence(data_file_path))
     return report
@@ -86,9 +85,7 @@ def generate_final_report(readiness_metrics_json_path):
             "file_format_check": f"File format is {readiness_metrics_raw['file_format'].lower()}",
             
             "uniform_encoding": f"{readiness_metrics_raw['date_issues_percentage']} issues found in '{readiness_metrics_raw['date_column']}' column" if readiness_metrics_raw['date_issues_percentage'] != "None" else "No date column found",
-            
-            # "label_presence": f"{readiness_metrics_raw['label_presence_count']}% fill rate found in '{readiness_metrics_raw['label_column']}' column" if readiness_metrics_raw['label_presence_count'] != "None" else "Label column not found",
-            
+                        
             "timestamp_fields_found": "All timestamp fields valid" if readiness_metrics_raw["timestamp_fields_found"] != "None" else "No timestamp fields found",
             
             "documentation_presence": "README or data dictionary file found" if readiness_metrics_raw["documentation_found"] else "No documentation file found"
@@ -128,8 +125,8 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Data Relevance and Completeness",
-            "weight": 10,
+            "bucket": "Data Relevance and Completeness (Not Applicable)" if notes["coverage_check"] == "No region column found" else "Data Relevance and Completeness",
+            "weight": 0 if notes["coverage_check"] == "No region column found" else 10,
             "tests": [
                 {
                     "id": "2.1",
@@ -137,7 +134,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Coverage Check",
                     "note": notes["coverage_check"],
                     "score": detailed_scores["coverage_check"],
-                    "max_score": 10
+                    "max_score": 0 if notes["coverage_check"] == "No region column found" else 10
                 },
             ]
         },
@@ -164,8 +161,8 @@ def generate_final_report(readiness_metrics_json_path):
             ]
         },
         {
-            "bucket": "Standardisation",
-            "weight": 15,
+            "bucket": "Standardisation (Uniform Encoding of Dates Not Applicable)" if notes["uniform_encoding"] == "No date column found" else "Standardisation",
+            "weight": 10 if notes["uniform_encoding"] == "No date column found" else 20,
             "tests": [
                 {
                     "id": "4.1",
@@ -173,7 +170,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "File Format Check",
                     "note": notes["file_format_check"],
                     "score": detailed_scores["file_format_check"],
-                    "max_score": 5
+                    "max_score": 10
                 },
                 {
                     "id": "4.2",
@@ -181,27 +178,13 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Uniform Encoding of Dates",
                     "note": notes["uniform_encoding"],
                     "score": detailed_scores["uniform_encoding"],
-                    "max_score": 10
+                    "max_score": 0 if notes["uniform_encoding"] == "No date column found" else 10
                 }
             ]
         },
-        # {
-        #     "bucket": "Model Ingestible Data",
-        #     "weight": 10,
-        #     "tests": [
-        #         {
-        #             "id": "5.1",
-        #             "key": "label_presence",
-        #             "title": "Label Presence",
-        #             "note": notes["label_presence"],
-        #             "score": detailed_scores["label_presence"],
-        #             "max_score": 10
-        #         }
-        #     ]
-        # },
         {
-            "bucket": "Regular Refresh",
-            "weight": 10,
+            "bucket": "Regular Refresh (Not Applicable)" if notes["timestamp_fields_found"] == "No timestamp fields found" else "Regular Refresh",
+            "weight": 0 if notes["timestamp_fields_found"] == "No timestamp fields found" else 10,
             "tests": [
                 {
                     "id": "5.1",
@@ -209,13 +192,13 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Timestamps Presence",
                     "note": notes["timestamp_fields_found"],
                     "score": detailed_scores["timestamp_fields_found"],
-                    "max_score": 10
+                    "max_score": 0 if notes["timestamp_fields_found"] == "No timestamp fields found" else 10
                 }
             ]
         },
         {
             "bucket": "Documentation",
-            "weight": 10,
+            "weight": 15,
             "tests": [
                 {
                     "id": "6.1",
@@ -223,7 +206,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Documentation Presence",
                     "note": notes["documentation_presence"],
                     "score": detailed_scores["documentation_presence"],
-                    "max_score": 10
+                    "max_score": 15
                 }
             ]
         }

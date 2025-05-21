@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-from report.pdf_writer import generate_pdf_from_json
 import chardet
 
 def load_data_from_directory(directory):

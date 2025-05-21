@@ -54,7 +54,7 @@ def main():
                 # Generate a PDF report
                 pdf_output = f"outputReports/{dataset_name}_data_readiness_report.pdf"
                 logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-                generate_pdf_from_json(f"outputReports/{dataset_name}_final_readiness_report.json", pdf_output, dataset_name, final_score["total_score"], logo_path)
+                generate_pdf_from_json(f"outputReports/{dataset_name}_final_readiness_report.json", pdf_output, dataset_name, final_score["total_score"], final_score["total_weights"], logo_path)
                 print(f"PDF generated for {file_path}")
 
             except Exception as e:

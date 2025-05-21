@@ -22,14 +22,13 @@ def compute_aggregate_score(report_dict, df):
         "column_missing": 15,
         "row_missing": 10,
         "exact_row_duplicates": 10,
-        "coverage_check": 10,
+        "coverage_check": 10 if report_dict.get("region_coverage") != 'None' else 0,
         "numeric_variance": 5,
         "categorical_variation": 5,
-        "file_format_check": 5,
-        "uniform_encoding": 10,
-        # "label_presence": 10,
-        "timestamp_fields_found": 10,
-        "documentation_presence": 10,
+        "file_format_check": 10,
+        "uniform_encoding": 10 if report_dict.get("date_issues_percentage") != 'None' else 0,
+        "timestamp_fields_found": 10 if report_dict.get("timestamp_fields_found") != 'None' else 0,
+        "documentation_presence": 15,
     }
 
     # 1. Column-wise Missing (score decreases as missing % increases)
@@ -109,17 +108,8 @@ def compute_aggregate_score(report_dict, df):
         detailed_scores["uniform_encoding"] = round(score, 2)
         total_score += score
 
-    # # 9. Label Presence (Boolean)
-    # if "label_presence_count" in report_dict:
-    #     if report_dict["label_presence_count"] == 'None':
-    #         score = weights["label_presence"]
-    #     else:
-    #         non_null_percentage = float(report_dict["label_presence_count"])
-    #         score = max(0, weights["label_presence"] * non_null_percentage / 100)
-    #     detailed_scores["label_presence"] = round(score, 2)
-    #     total_score += score
 
-    # 10. Timestamps Presence (Boolean)
+    # 9. Timestamps Presence (Boolean)
     if "timestamp_fields_found" in report_dict:
         if report_dict["timestamp_fields_found"] == 'None':
             score = weights["timestamp_fields_found"]
@@ -129,7 +119,7 @@ def compute_aggregate_score(report_dict, df):
         detailed_scores["timestamp_fields_found"] = round(score, 2)
         total_score += score
 
-    # 11. Documentation Presence (Boolean)
+    # 10. Documentation Presence (Boolean)
     if "documentation_found" in report_dict:
         score = weights["documentation_presence"] if report_dict["documentation_found"] else 0
 
@@ -138,6 +128,7 @@ def compute_aggregate_score(report_dict, df):
     
     # Output the results as a dictionary
     final_report = {
+        "total_weights": sum(weights.values()),
         "total_score": round(total_score, 2),
         "detailed_scores": detailed_scores
     }

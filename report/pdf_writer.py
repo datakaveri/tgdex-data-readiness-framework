@@ -3,7 +3,7 @@ import json
 import datetime
 
 class PDFReport(FPDF):
-    def __init__(self, dataset_name, total_score, logo_path=None):
+    def __init__(self, dataset_name, total_score, total_weights, logo_path=None):
         """
         Constructor for PDFReport
 
@@ -19,6 +19,8 @@ class PDFReport(FPDF):
         super().__init__()
         self.dataset_name = dataset_name
         self.total_score = total_score
+        self.total_weights = total_weights
+        self.percent_score = total_score / total_weights * 100
         self.logo_path = logo_path
         self.set_auto_page_break(auto=True, margin=15)
         self.add_page()
@@ -41,8 +43,13 @@ class PDFReport(FPDF):
         self.cell(0, 10, f"Report generated on: {datetime.datetime.now().strftime('%d-%b-%Y')}", ln=True, align='L')
 
         self.set_font("Helvetica", 'B', 12)
+        self.set_xy(160, 30)
+        self.cell(0, 10, f"Score: {self.total_score:.2f} / {self.total_weights:.2f}", ln=True, align='L')
+        
+        self.set_font("Helvetica", 'B', 12)
         self.set_xy(160, 35)
-        self.cell(0, 10, f"Overall Score: {self.total_score:.2f}%", ln=True, align='L')
+        self.cell(0, 10, f"Percentage: {self.percent_score:.2f}%", ln=True, align='L')
+
 
         # self.ln(5)
 
@@ -99,7 +106,7 @@ class PDFReport(FPDF):
             self.cell(col_widths[4], 8, f"{sum(test['max_score'] for test in section['tests']):.0f}", border=1, align='C', fill=True)
             self.ln()
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, logo_path=None):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -124,6 +131,6 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, lo
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, logo_path)
+    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path)
     pdf.render_table(data)
     pdf.output(output_path)
