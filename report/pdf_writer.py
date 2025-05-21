@@ -34,8 +34,11 @@ class PDFReport(FPDF):
         self.set_xy(15, 10)
         self.cell(0, 10, 'Data Readiness Report', ln=True, align='C')
 
+        x, y = 9, 30
+        if len(self.dataset_name.encode('utf-8')) > 55:
+            y = 25
         self.set_font("Helvetica", '', 12)
-        self.set_xy(9, 25)
+        self.set_xy(x, y)
         self.cell(0, 10, f"Dataset Name: {self.dataset_name}", ln=True, align='L')
 
         self.set_font("Helvetica", '', 12)
