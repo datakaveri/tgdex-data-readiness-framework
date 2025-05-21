@@ -19,7 +19,13 @@ def check_numeric_variance(df, cv_threshold=0.1):
     numeric_cols = df.select_dtypes(include=['number'])
     if numeric_cols.empty:
         return None
-    low_variance_cols = [col for col in numeric_cols if df[col].std() / df[col].mean() < cv_threshold]
+    low_variance_cols = []
+    for col in numeric_cols:
+        mean = df[col].mean()
+        if mean == 0:
+            continue
+        if df[col].std() / mean < cv_threshold:
+            low_variance_cols.append(col)
     return {
         "low_variance_numeric_columns": low_variance_cols,
         "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 2),
