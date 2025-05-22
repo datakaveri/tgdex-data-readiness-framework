@@ -34,20 +34,17 @@ class PDFReport(FPDF):
         self.set_xy(15, 10)
         self.cell(0, 10, 'Data Readiness Report', ln=True, align='C')
 
-        x, y = 9, 30
-        if len(self.dataset_name.encode('utf-8')) > 55:
-            y = 25
         self.set_font("Helvetica", '', 12)
-        self.set_xy(x, y)
-        self.cell(0, 10, f"Dataset Name: {self.dataset_name}", ln=True, align='L')
+        self.set_xy(9, 30)
+        self.cell(0, 10, f"Dataset: {self.dataset_name}", ln=True, align='L')
 
         self.set_font("Helvetica", '', 12)
         self.set_xy(9, 35)
         self.cell(0, 10, f"Report generated on: {datetime.datetime.now().strftime('%d-%b-%Y')}", ln=True, align='L')
 
-        self.set_font("Helvetica", 'B', 12)
-        self.set_xy(160, 30)
-        self.cell(0, 10, f"Score: {self.total_score:.2f} / {self.total_weights:.2f}", ln=True, align='L')
+        # self.set_font("Helvetica", 'B', 12)
+        # self.set_xy(160, 30)
+        # self.cell(0, 10, f"Score: {self.total_score:.2f} / {self.total_weights:.2f}", ln=True, align='L')
         
         self.set_font("Helvetica", 'B', 12)
         self.set_xy(160, 35)
@@ -76,15 +73,32 @@ class PDFReport(FPDF):
         self.ln()
 
         self.set_font("Helvetica", '', 9)
+        # Filter out sections where all tests have max_score == 0
+        filtered_data = []
         for section in data:
+            # Remove tests with max_score == 0 if there are other tests in the section
+            filtered_tests = [test for test in section['tests'] if test['max_score'] != 0]
+            if not filtered_tests and len(section['tests']) == 1:
+                continue  # Skip section if only one test and its max_score == 0
+            elif filtered_tests:
+            # Keep section with filtered tests
+                section_copy = section.copy()
+                section_copy['tests'] = filtered_tests
+                filtered_data.append(section_copy)
+            else:
+            # If all tests have max_score == 0 but more than one test, remove those tests
+                continue
+
+        for section in filtered_data:
+            if any(test['max_score'] != 0 for test in section['tests']):
             # Bucket heading
-            self.set_fill_color(200, 240, 200)  # Light green
-            self.set_text_color(0, 0, 0)  # Black text
-            self.set_font("Helvetica", 'B', 10)
-            self.cell(sum(col_widths), 8, f"{section['bucket']} ({section['weight']}%)", ln=True, fill=True, border=1)
-            self.set_fill_color(255, 255, 255)  # White background
-            self.set_text_color(0, 0, 0)  # Black text
-            self.set_font("Helvetica", '', 9)
+                self.set_fill_color(200, 240, 200)  # Light green
+                self.set_text_color(0, 0, 0)  # Black text
+                self.set_font("Helvetica", 'B', 10)
+                self.cell(sum(col_widths), 8, f"{section['bucket']}", ln=True, fill=True, border=1)
+                self.set_fill_color(255, 255, 255)  # White background
+                self.set_text_color(0, 0, 0)  # Black text
+                self.set_font("Helvetica", '', 9)
 
             # Render each test
             for test in section['tests']:
