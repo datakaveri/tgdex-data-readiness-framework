@@ -30,8 +30,8 @@ class PDFReport(FPDF):
         if self.logo_path:
             self.image(self.logo_path, 10, 5, 25)  # Logo at top-left, width = 20
 
-        self.set_font("Helvetica", 'B', 16)
-        self.set_xy(15, 10)
+        self.set_font("Helvetica", 'B', 18)
+        self.set_xy(10, 10)
         self.cell(0, 10, 'Data Readiness Report', ln=True, align='C')
 
         self.set_font("Helvetica", '', 10)

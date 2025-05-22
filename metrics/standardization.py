@@ -45,7 +45,7 @@ def check_date_format(df, imputed_columns=None):
     expected_date_format = date_info.get("format", [])
 
     if not expected_date_format or not columns_to_validate:
-        return {"date_column": "No columns or format specified", "date_issues_percentage": 'None'}
+        return {"date_column": "None", "date_issues_percentage": 'None'}
 
     date_fields_found = []
     date_issues_count = 0
@@ -63,5 +63,6 @@ def check_date_format(df, imputed_columns=None):
         except Exception:
             continue
     return {"date_column": date_fields_found, 
+            "number_of_date_columns": len(date_fields_found),
             "date_issues_percentage": round(date_issues_count / total_entries * 100, 2) if total_entries > 0 else 0.0}
 
