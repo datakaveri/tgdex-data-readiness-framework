@@ -24,7 +24,7 @@ def check_file_format(directory):
     return {"file_format": "valid" if any(any(f.endswith(fmt) for fmt in valid_formats) for f in files) else "invalid"}
 
 
-def check_date_format(df, imputed_columns=None):
+def check_date_and_timestamp_format(df, imputed_columns=None):
     """
     Validates date columns against the expected format specified in imputed_columns.
 
@@ -40,29 +40,62 @@ def check_date_format(df, imputed_columns=None):
     dict
         Column names mapped to percentage of invalid entries.
     """
+    if not imputed_columns:
+        return {"date_column": "None", "timestamp_column": "None", "number_of_date_columns": 0, "number_of_timestamp_columns": 0, "datetime_issues_percentage": 'None'}
+
     date_info = imputed_columns.get("date", {})
-    columns_to_validate = date_info.get("column", [])
+    timestamp_info = imputed_columns.get("timestamp", {})
+    
+    columns_to_validate_date = date_info.get("column", [])
+    columns_to_validate_timestamp = timestamp_info.get("column", [])
+    
     expected_date_format = date_info.get("format", [])
-
-    if not expected_date_format or not columns_to_validate:
-        return {"date_column": "None", "date_issues_percentage": 'None'}
-
+    expected_timestamp_format = timestamp_info.get("format", [])
+    
+    if not (expected_date_format and columns_to_validate_date) and not (expected_timestamp_format and columns_to_validate_timestamp):
+        return {"date_column": "None", "timestamp_column": "None", "number_of_date_columns": 0, "number_of_timestamp_columns": 0, "datetime_issues_percentage": 'None'}
+    
     date_fields_found = []
+    timestamp_fields_found = []
     date_issues_count = 0
-    total_entries = 0
-    if isinstance(columns_to_validate, str):
-        columns_to_validate = [columns_to_validate]
-    for col in columns_to_validate:
-        if col not in df.columns:
-            continue
-        date_fields_found.append(col)
-        try:
-            parsed = pd.to_datetime(df[col], format=expected_date_format, errors="coerce")
-            date_issues_count += parsed.isna().sum()
-            total_entries += len(parsed)
-        except Exception:
-            continue
-    return {"date_column": date_fields_found, 
-            "number_of_date_columns": len(date_fields_found),
-            "date_issues_percentage": round(date_issues_count / total_entries * 100, 2) if total_entries > 0 else 0.0}
+    timestamp_issues_count = 0
+    total_date_entries = 0
+    total_timestamp_entries = 0
+    
+    if isinstance(columns_to_validate_date, str):
+        columns_to_validate_date = [columns_to_validate_date]
+    if isinstance(columns_to_validate_timestamp, str):
+        columns_to_validate_timestamp = [columns_to_validate_timestamp]
+
+    if columns_to_validate_date is not None:
+        for date_col in columns_to_validate_date:
+            if date_col in df.columns:
+                date_fields_found.append(date_col)
+                try:
+                    parsed = pd.to_datetime(df[date_col], format=expected_date_format, errors="coerce")
+                    date_issues_count += parsed.isna().sum()
+                    total_date_entries += len(parsed)
+                except Exception:
+                    continue
+    
+    if columns_to_validate_timestamp is not None:
+        for timestamp_col in columns_to_validate_timestamp:
+            if timestamp_col in df.columns:
+                timestamp_fields_found.append(timestamp_col)
+                try:
+                    parsed = pd.to_datetime(df[timestamp_col], format=expected_timestamp_format, errors="coerce")
+                    timestamp_issues_count += parsed.isna().sum()
+                    total_timestamp_entries += len(parsed)
+                except Exception:
+                    continue
+
+    total_issues_count = date_issues_count + timestamp_issues_count
+    total_entries = total_date_entries + total_timestamp_entries
+    return {
+        "date_column": date_fields_found,
+        "timestamp_column": timestamp_fields_found,
+        "number_of_date_columns": len(date_fields_found),
+        "number_of_timestamp_columns": len(timestamp_fields_found),
+        "datetime_issues_percentage": round(total_issues_count / total_entries * 100, 2) if total_entries > 0 else 0.0
+    }
 

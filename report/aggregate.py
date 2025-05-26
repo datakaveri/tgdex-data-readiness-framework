@@ -33,8 +33,8 @@ def generate_raw_report(df, data_file_path, imputed_columns=None):
     report.update(check_numeric_variance(df))
     report.update(check_categorical_variation(df))
     report.update(check_file_format(data_file_path))
-    report.update(check_date_format(df, imputed_columns))
-    report.update(check_timestamp_fields(df, imputed_columns))
+    report.update(check_date_and_timestamp_format(df, imputed_columns))
+    report.update(check_date_or_timestamp_fields(df, imputed_columns))
     report.update(check_documentation_presence(data_file_path))
     return report
 
@@ -78,7 +78,7 @@ def generate_final_report(readiness_metrics_json_path):
             "categorical_variation": 5,
             "file_format_check": 10,
             "uniform_encoding": 10,
-            "timestamp_fields_found": 10,
+            "date_or_timestamp_fields_found": 10,
             "documentation_presence": 15,
         }
         return {
@@ -122,22 +122,24 @@ def generate_final_report(readiness_metrics_json_path):
             "Failed: File format provides opportunity for conversion to the required format.",
 
             "uniform_encoding": (
-                "No date columns found." if readiness_metrics_raw["date_column"] == 'None'
+                "No date or time columns found." if readiness_metrics_raw["date_column"] == 'None' and readiness_metrics_raw["timestamp_column"] == 'None'
                 else (
-                    f"Passed: All dates in {len(readiness_metrics_raw['date_column'])} date columns use consistent format."
-                    if len(readiness_metrics_raw['date_column']) > 1 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
+                    f"Passed: All dates in {len(readiness_metrics_raw['date_column'])} date columns and timestamps in {len(readiness_metrics_raw['timestamp_column'])} timestamp columns use consistent format."
+                    if len(readiness_metrics_raw['date_column']) > 0 and len(readiness_metrics_raw['timestamp_column']) > 0 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
                     else f"Passed: All dates in '{readiness_metrics_raw['date_column'][0]}' column use consistent format."
                     if len(readiness_metrics_raw['date_column']) == 1 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
-                    else f"Failed: Dates in {(readiness_metrics_raw['number_of_date_columns'])} date columns offer potential for standardization to a single format."
+                    else f"Passed: All timestamps in '{readiness_metrics_raw['timestamp_column'][0]}' column use consistent format."
+                    if len(readiness_metrics_raw['timestamp_column']) == 1 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
+                    else f"Failed: Dates in {(readiness_metrics_raw['number_of_date_columns'])} date columns and timestamps in {(readiness_metrics_raw['number_of_timestamp_columns'])} timestamp columns offer potential for standardization to a single format."
                 )
             ),
 
-            "timestamp_fields_found": (
-                "No timestamp fields found." if readiness_metrics_raw["timestamp_fields_found"] == 'None' 
+            "date_or_timestamp_fields_found": (
+                "No datetime fields found." if readiness_metrics_raw["date_or_timestamp_fields_found"] == 'None' 
                 else ( 
-                    f"Passed: 100% of values are populated across all {len(readiness_metrics_raw['timestamp_fields_found'])} timestamp fields." if readiness_metrics_raw["detailed_scores"]["timestamp_fields_found"] == max_scores["timestamp_fields_found"] 
+                    f"Passed: 100% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields." if readiness_metrics_raw["detailed_scores"]["date_or_timestamp_fields_found"] == max_scores["date_or_timestamp_fields_found"] 
                     else 
-                    f"Failed: {100 - readiness_metrics_raw['timestamp_issues_percentage']}% of values are populated across {len(readiness_metrics_raw['timestamp_fields_found'])} timestamp fields."
+                    f"Failed: {100 - readiness_metrics_raw['date_or_timestamp_issues_percentage']}% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields."
                 )
             ),
 
@@ -219,7 +221,7 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Standardisation",
-            "weight": 10 if notes["uniform_encoding"] == "No date columns found." else 20,
+            "weight": 10 if notes["uniform_encoding"] == "No date or time columns found." else 20,
             "tests": [
                 {
                     "id": "4.1",
@@ -232,24 +234,24 @@ def generate_final_report(readiness_metrics_json_path):
                 {
                     "id": "4.2",
                     "key": "uniform_encoding",
-                    "title": "Uniform Encoding of Dates",
+                    "title": "Uniform Encoding",
                     "note": notes["uniform_encoding"],
                     "score": detailed_scores["uniform_encoding"],
-                    "max_score": 0 if notes["uniform_encoding"] == "No date columns found." else 10
+                    "max_score": 0 if notes["uniform_encoding"] == "No date or time columns found." else 10
                 }
             ]
         },
         {
             "bucket": "Regular Refresh",
-            "weight": 0 if notes["timestamp_fields_found"] == "No timestamp fields found" else 10,
+            "weight": 0 if notes["date_or_timestamp_fields_found"] == "No date or timestamp fields found" else 10,
             "tests": [
                 {
                     "id": "5.1",
-                    "key": "timestamp_fields_found",
-                    "title": "Timestamps Presence",
-                    "note": notes["timestamp_fields_found"],
-                    "score": detailed_scores["timestamp_fields_found"],
-                    "max_score": 0 if notes["timestamp_fields_found"] == "No timestamp fields found." else 10
+                    "key": "date_or_timestamp_fields_found",
+                    "title": "DateTime Fields Presence",
+                    "note": notes["date_or_timestamp_fields_found"],
+                    "score": detailed_scores["date_or_timestamp_fields_found"],
+                    "max_score": 0 if notes["date_or_timestamp_fields_found"] == "No datetime fields found." else 10
                 }
             ]
         },

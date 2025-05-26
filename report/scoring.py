@@ -26,8 +26,8 @@ def compute_aggregate_score(report_dict, df):
         "numeric_variance": 5,
         "categorical_variation": 5,
         "file_format_check": 10,
-        "uniform_encoding": 10 if report_dict.get("date_issues_percentage") != 'None' else 0,
-        "timestamp_fields_found": 10 if report_dict.get("timestamp_fields_found") != 'None' else 0,
+        "uniform_encoding": 10 if report_dict.get("datetime_issues_percentage") != 'None' else 0,
+        "date_or_timestamp_fields_found": 10 if report_dict.get("date_or_timestamp_fields_found") != 'None' else 0,
         "documentation_presence": 15,
     }
 
@@ -99,9 +99,9 @@ def compute_aggregate_score(report_dict, df):
         total_score += score
 
     # 8. Uniform Encoding / Date Format
-    if "date_issues_percentage" in report_dict:
-        if report_dict["date_issues_percentage"] != "None":
-            prop = report_dict["date_issues_percentage"]
+    if "datetime_issues_percentage" in report_dict:
+        if report_dict["datetime_issues_percentage"] != "None":
+            prop = report_dict["datetime_issues_percentage"]
             score = max(0, weights["uniform_encoding"] * (1 - prop / 100))
         else:
             score = weights["uniform_encoding"]
@@ -110,13 +110,13 @@ def compute_aggregate_score(report_dict, df):
 
 
     # 9. Timestamps Presence (Boolean)
-    if "timestamp_fields_found" in report_dict:
-        if report_dict["timestamp_fields_found"] == 'None':
-            score = weights["timestamp_fields_found"]
+    if "date_or_timestamp_fields_found" in report_dict:
+        if report_dict["date_or_timestamp_fields_found"] == 'None':
+            score = weights["date_or_timestamp_fields_found"]
         else:
-            prop = report_dict["timestamp_issues_percentage"]
-            score = max(0, weights["timestamp_issues_percentage"] * (1 - prop / 100))
-        detailed_scores["timestamp_fields_found"] = round(score, 2)
+            prop = report_dict["date_or_timestamp_issues_percentage"]
+            score = max(0, weights["date_or_timestamp_fields_found"] * (1 - prop / 100))
+        detailed_scores["date_or_timestamp_fields_found"] = round(score, 2)
         total_score += score
 
     # 10. Documentation Presence (Boolean)

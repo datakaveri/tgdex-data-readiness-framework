@@ -1,7 +1,7 @@
 import pytest
 import os
 import pandas as pd
-from metrics.standardization import check_file_format, check_date_format 
+from metrics.standardization import check_file_format, check_date_and_timestamp_format 
 
 @pytest.fixture(autouse=True)
 def temp_dir():
@@ -30,33 +30,37 @@ def test_empty_directory(temp_dir):
     # The temporary directory is already empty
     assert check_file_format(temp_dir) == {"file_format": "invalid"}
 
-def test_valid_date_format():
-    # Create a DataFrame with a valid date column
+    # Define df and imputed_columns for the test
     df = pd.DataFrame({'date': ['2022-01-01', '2022-01-02']})
     imputed_columns = {'date': {'column': ['date'], 'format': '%Y-%m-%d'}}
-    result = check_date_format(df, imputed_columns)
-    assert result['date_column'] == ['date']
-    assert result['date_issues_percentage'] == {'date': 0.0}
+    result = check_date_and_timestamp_format(df, imputed_columns)
+    expected = {"date_column": ['date'], "timestamp_column": [], "number_of_date_columns": 1, "number_of_timestamp_columns": 0.0, "datetime_issues_percentage": 0.0}
+    assert result == expected
 
-def test_invalid_date_format():
-    # Create a DataFrame with an invalid date column
+def test_check_date_and_timestamp_format_valid_date():
+    df = pd.DataFrame({'date': ['2022-01-01', '2022-01-02']})
+    imputed_columns = {'date': {'column': ['date'], 'format': '%Y-%m-%d'}}
+    result = check_date_and_timestamp_format(df, imputed_columns)
+    expected = {"date_column": ['date'], "timestamp_column": [], "number_of_date_columns": 1, "number_of_timestamp_columns": 0.0, "datetime_issues_percentage": 0.0}
+    assert result == expected
+
+def test_check_date_and_timestamp_format_invalid_date():
     df = pd.DataFrame({'date': ['2022-01-01', ' invalid']})
     imputed_columns = {'date': {'column': ['date'], 'format': '%Y-%m-%d'}}
-    result = check_date_format(df, imputed_columns)
-    assert result['date_column'] == ['date']
-    assert result['date_issues_percentage'] == {'date': 50.0}
+    result = check_date_and_timestamp_format(df, imputed_columns)
+    expected = {"date_column": ['date'], "timestamp_column": [], "number_of_date_columns": 1, "number_of_timestamp_columns": 0.0, "datetime_issues_percentage": 50.0}
+    assert result == expected
 
-def test_missing_date_column():
-    # Create a DataFrame without the specified date column
+def test_check_date_and_timestamp_format_missing_date_column():
     df = pd.DataFrame({'other_column': [1, 2]})
     imputed_columns = {'date': {'column': ['date'], 'format': '%Y-%m-%d'}}
-    result = check_date_format(df, imputed_columns)
-    assert result['date_column'] == []
-    assert result['date_issues_percentage'] == {}
+    result = check_date_and_timestamp_format(df, imputed_columns)
+    expected = {"date_column": [], "timestamp_column": [], "number_of_date_columns": 0, "number_of_timestamp_columns": 0.0, "datetime_issues_percentage": 0.0}
+    assert result == expected
 
-def test_missing_date_format():
-    # Create a DataFrame with a date column but without a specified format
-    df = pd.DataFrame({'date': ['2022-01-01', '2022-01-02']})
-    imputed_columns = {'date': {'column': ['date']}}
-    result = check_date_format(df, imputed_columns)
-    assert result == {'date_column': "No columns or format specified", 'date_issues_percentage': 'None'}
+def test_check_date_and_timestamp_format_empty_df():
+    df = pd.DataFrame()
+    imputed_columns = {}
+    result = check_date_and_timestamp_format(df, imputed_columns)
+    expected = {"date_column": "None", "timestamp_column": "None", "number_of_date_columns": 0, "number_of_timestamp_columns": 0.0, "datetime_issues_percentage": 'None'}
+    assert result == expected
