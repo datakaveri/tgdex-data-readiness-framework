@@ -102,7 +102,7 @@ def generate_final_report(readiness_metrics_json_path):
                 else (
                     f"Passed: 100% coverage achieved across all regional columns."
                     if "region_coverage" in readiness_metrics_raw and readiness_metrics_raw["detailed_scores"]["coverage_check"] == max_scores["coverage_check"]
-                    else f"Failed: {readiness_metrics_raw['region_coverage']:.2f}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
+                    else f"Failed: {(100 - readiness_metrics_raw['region_coverage']):.2f}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
                 )
             ),
             
