@@ -83,70 +83,70 @@ def generate_final_report(readiness_metrics_json_path):
         }
         return {
             "column_missing": 
-            f"Passed: All {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
+            f"All {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
             else 
-            f"Failed: {readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled",
+            f"{readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled",
 
             "row_missing": 
-            f"Passed: All {readiness_metrics_raw['number_of_rows']} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
+            f"All {readiness_metrics_raw['number_of_rows']} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
             else 
-            f"Failed: {readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({readiness_metrics_raw['row_missing_percentage']:.1f}%) have at least 50% of fields populated.",
+            f"{readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({readiness_metrics_raw['row_missing_percentage']:.1f}%) have at least 50% of fields populated.",
 
             "exact_row_duplicates": 
-            f"Passed: 100% of rows are unique with no duplicates detected." if readiness_metrics_raw["detailed_scores"]["exact_row_duplicates"] == max_scores["exact_row_duplicates"] 
+            f"100% of rows are unique with no duplicates detected." if readiness_metrics_raw["detailed_scores"]["exact_row_duplicates"] == max_scores["exact_row_duplicates"] 
             else 
-            f"Failed: {100 - readiness_metrics_raw['exact_row_duplicates_percentage']:.1f}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates']} duplicate rows identified.",
+            f"{100 - readiness_metrics_raw['exact_row_duplicates_percentage']:.1f}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates']} duplicate rows identified.",
             
             "coverage_check": (
                 "No region columns found." if readiness_metrics_raw["region_coverage"] == 'None'
                 else (
-                    f"Passed: 100% coverage achieved across all regional columns."
+                    f"100% coverage achieved across all regional columns."
                     if "region_coverage" in readiness_metrics_raw and readiness_metrics_raw["detailed_scores"]["coverage_check"] == max_scores["coverage_check"]
-                    else f"Failed: {(100 - readiness_metrics_raw['region_coverage']):.2f}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
+                    else f"{(100 - readiness_metrics_raw['region_coverage']):.2f}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
                 )
             ),
             
             "numeric_variance": 
-            f"Passed: All {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation." if readiness_metrics_raw["detailed_scores"]["numeric_variance"] == max_scores["numeric_variance"] 
+            f"All {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation." if readiness_metrics_raw["detailed_scores"]["numeric_variance"] == max_scores["numeric_variance"] 
             else 
-            f"Failed: {readiness_metrics_raw['number_of_numeric_columns'] - len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation.",
+            f"{readiness_metrics_raw['number_of_numeric_columns'] - len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation.",
             
             "categorical_variation": 
-            f"Passed: All {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values." if readiness_metrics_raw["detailed_scores"]["categorical_variation"] == max_scores["categorical_variation"] 
+            f"All {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values." if readiness_metrics_raw["detailed_scores"]["categorical_variation"] == max_scores["categorical_variation"] 
             else 
-            f"Failed: {readiness_metrics_raw['number_of_categorical_columns'] - len(readiness_metrics_raw['dominant_categorical_columns'])} out of {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values.",
+            f"{readiness_metrics_raw['number_of_categorical_columns'] - len(readiness_metrics_raw['dominant_categorical_columns'])} out of {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values.",
             
             "file_format_check": 
-            "Passed: File format meets all requirements." if readiness_metrics_raw["detailed_scores"]["file_format_check"] == max_scores["file_format_check"] 
+            "File format meets all requirements." if readiness_metrics_raw["detailed_scores"]["file_format_check"] == max_scores["file_format_check"] 
             else 
-            "Failed: File format provides opportunity for conversion to the required format.",
+            "File format provides opportunity for conversion to the required format.",
 
             "uniform_encoding": (
                 "No date or time columns found." if readiness_metrics_raw["date_column"] == 'None' and readiness_metrics_raw["timestamp_column"] == 'None'
                 else (
-                    f"Passed: All dates in {len(readiness_metrics_raw['date_column'])} date columns and timestamps in {len(readiness_metrics_raw['timestamp_column'])} timestamp columns use consistent format."
+                    f"All dates in {len(readiness_metrics_raw['date_column'])} date columns and timestamps in {len(readiness_metrics_raw['timestamp_column'])} timestamp columns use consistent format."
                     if len(readiness_metrics_raw['date_column']) > 0 and len(readiness_metrics_raw['timestamp_column']) > 0 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
-                    else f"Passed: All dates in '{readiness_metrics_raw['date_column'][0]}' column use consistent format."
+                    else f"All dates in '{readiness_metrics_raw['date_column'][0]}' column use consistent format."
                     if len(readiness_metrics_raw['date_column']) == 1 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
-                    else f"Passed: All timestamps in '{readiness_metrics_raw['timestamp_column'][0]}' column use consistent format."
+                    else f"All timestamps in '{readiness_metrics_raw['timestamp_column'][0]}' column use consistent format."
                     if len(readiness_metrics_raw['timestamp_column']) == 1 and readiness_metrics_raw["detailed_scores"]["uniform_encoding"] == max_scores["uniform_encoding"]
-                    else f"Failed: Dates in {(readiness_metrics_raw['number_of_date_columns'])} date columns and timestamps in {(readiness_metrics_raw['number_of_timestamp_columns'])} timestamp columns offer potential for standardization to a single format."
+                    else f"Dates in {(readiness_metrics_raw['number_of_date_columns'])} date columns and timestamps in {(readiness_metrics_raw['number_of_timestamp_columns'])} timestamp columns offer potential for standardization to a single format."
                 )
             ),
 
             "date_or_timestamp_fields_found": (
                 "No datetime fields found." if readiness_metrics_raw["date_or_timestamp_fields_found"] == 'None' 
                 else ( 
-                    f"Passed: 100% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields." if readiness_metrics_raw["detailed_scores"]["date_or_timestamp_fields_found"] == max_scores["date_or_timestamp_fields_found"] 
+                    f"100% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields." if readiness_metrics_raw["detailed_scores"]["date_or_timestamp_fields_found"] == max_scores["date_or_timestamp_fields_found"] 
                     else 
-                    f"Failed: {100 - readiness_metrics_raw['date_or_timestamp_issues_percentage']}% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields."
+                    f"{100 - readiness_metrics_raw['date_or_timestamp_issues_percentage']}% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields."
                 )
             ),
 
             "documentation_presence": (
-                "Passed: Documentation includes comprehensive data dictionary files." if readiness_metrics_raw["detailed_scores"]["documentation_presence"] == max_scores["documentation_presence"] 
+                "Documentation includes comprehensive data dictionary files." if readiness_metrics_raw["detailed_scores"]["documentation_presence"] == max_scores["documentation_presence"] 
                 else 
-                "Failed: Dataset requires documentation to be added."
+                "Dataset requires documentation to be added."
             )
         }
 
