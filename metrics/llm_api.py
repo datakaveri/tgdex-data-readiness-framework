@@ -48,7 +48,7 @@ def infer_column_roles_openai(df, api_key):
 
     user_prompt = (
         f"Here are the column names:\n{column_names}\n\n"
-        f"And here are the first 5 rows of data:\n{json.dumps(first_rows, indent=2)}"
+        f"And here are the first 5 rows of data:\n{json.dumps([{k: str(v) for k,v in row.items()} for row in first_rows], indent=2)}"
     )
 
     response = client.chat.completions.create(
