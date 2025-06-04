@@ -19,7 +19,7 @@ class PDFReport(FPDF):
         super().__init__()
         self.sample = sample
         if self.sample:
-            self.dataset_name = f"{dataset_name} (Sampled - 5000 rows)"
+            self.dataset_name = f"{dataset_name} (Sampled)"
         else:
             self.dataset_name = dataset_name
         self.total_score = total_score
