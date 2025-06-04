@@ -18,8 +18,8 @@ def check_documentation_presence(descriptor_path):
     if descriptor_path is None:
         return {"documentation_found": False}
 
-    valid_file_names = [name.lower() for name in ["dataset_metadata", "README", "data_description", "data_description_file"]]
-    valid_extensions = [ext.lower() for ext in [".txt", ".json", ".md"]]
+    valid_file_names = [name.lower() for name in ["dataset_metadata", "README", "data_description", "data_description_file", "data_attributes"]]
+    valid_extensions = [ext.lower() for ext in [".txt", ".json", ".md", ".csv"]]
     exists = False
     for f in valid_file_names:
         for ext in valid_extensions:
