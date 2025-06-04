@@ -31,7 +31,7 @@ def generate_raw_report(df, data_file_path, imputed_columns=None):
     report.update(check_row_duplicates(df))
     report.update(check_coverage_region(df, imputed_columns))
     report.update(check_numeric_variance(df))
-    report.update(check_categorical_variation(df))
+    report.update(check_categorical_variation(df, imputed_columns))
     report.update(check_file_format(data_file_path))
     report.update(check_date_and_timestamp_format(df, imputed_columns))
     report.update(check_date_or_timestamp_fields(df, imputed_columns))
@@ -85,12 +85,12 @@ def generate_final_report(readiness_metrics_json_path):
             "column_missing": 
             f"All {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
             else 
-            f"{readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled",
+            f"{readiness_metrics_raw['number_of_columns'] - readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled",
 
             "row_missing": 
             f"All {readiness_metrics_raw['number_of_rows']} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
             else 
-            f"{readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({readiness_metrics_raw['row_missing_percentage']:.1f}%) have at least 50% of fields populated.",
+            f"{readiness_metrics_raw['number_of_rows'] - readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({100 - readiness_metrics_raw['row_missing_percentage']:.1f}%) have at least 50% of fields populated.",
 
             "exact_row_duplicates": 
             f"100% of rows are unique with no duplicates detected." if readiness_metrics_raw["detailed_scores"]["exact_row_duplicates"] == max_scores["exact_row_duplicates"] 
@@ -107,15 +107,22 @@ def generate_final_report(readiness_metrics_json_path):
             ),
             
             "numeric_variance": 
-            f"All {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation." if readiness_metrics_raw["detailed_scores"]["numeric_variance"] == max_scores["numeric_variance"] 
-            else 
-            f"{readiness_metrics_raw['number_of_numeric_columns'] - len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation.",
+            "No numeric columns found." if readiness_metrics_raw["number_of_numeric_columns"] == 0 
+            else (
+                f"All {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation." 
+                if readiness_metrics_raw["detailed_scores"]["numeric_variance"] == max_scores["numeric_variance"] 
+                else 
+                f"{readiness_metrics_raw['number_of_numeric_columns'] - len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation."
+            ),
             
             "categorical_variation": 
-            f"All {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values." if readiness_metrics_raw["detailed_scores"]["categorical_variation"] == max_scores["categorical_variation"] 
-            else 
-            f"{readiness_metrics_raw['number_of_categorical_columns'] - len(readiness_metrics_raw['dominant_categorical_columns'])} out of {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values.",
-            
+            "No categorical columns found." if readiness_metrics_raw["number_of_categorical_columns"] == 0 
+            else (
+                f"All {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values." 
+                if readiness_metrics_raw["detailed_scores"]["categorical_variation"] == max_scores["categorical_variation"] 
+                else 
+                f"{readiness_metrics_raw['number_of_categorical_columns'] - len(readiness_metrics_raw['dominant_categorical_columns'])} out of {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values."
+            ),
             "file_format_check": 
             "File format meets all requirements." if readiness_metrics_raw["detailed_scores"]["file_format_check"] == max_scores["file_format_check"] 
             else 
@@ -199,7 +206,9 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Data Variance and Correctness",
-            "weight": 10,
+            "weight": 0 if notes["numeric_variance"] == "No numeric columns found." and notes["categorical_variation"] == "No categorical columns found." else (
+                5 if notes["numeric_variance"] == "No numeric columns found." or notes["categorical_variation"] == "No categorical columns found." else 10
+            ),
             "tests": [
                 {
                     "id": "3.1",
@@ -207,7 +216,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Numeric Variance",
                     "note": notes["numeric_variance"],
                     "score": detailed_scores["numeric_variance"],
-                    "max_score": 5
+                    "max_score": 0 if notes["numeric_variance"] == "No numeric columns found." else 5
                 },
                 {
                     "id": "3.2",
@@ -215,7 +224,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Categorical Variation",
                     "note": notes["categorical_variation"],
                     "score": detailed_scores["categorical_variation"],
-                    "max_score": 5
+                    "max_score": 0 if notes["categorical_variation"] == "No categorical columns found." else 5
                 }
             ]
         },
