@@ -46,11 +46,10 @@ def check_date_and_timestamp_format(df, imputed_columns=None):
     date_info = imputed_columns.get("date", {})
     timestamp_info = imputed_columns.get("timestamp", {})
     
-    columns_to_validate_date = date_info.get("column", [])
-    columns_to_validate_timestamp = timestamp_info.get("column", [])
-    
-    expected_date_format = date_info.get("format", [])
-    expected_timestamp_format = timestamp_info.get("format", [])
+    columns_to_validate_date = date_info.get("column") if date_info else None
+    columns_to_validate_timestamp = timestamp_info.get("column") if timestamp_info else None
+    expected_date_format = date_info.get("format", []) if date_info else None
+    expected_timestamp_format = timestamp_info.get("format", []) if timestamp_info else None
     
     if not (expected_date_format and columns_to_validate_date) and not (expected_timestamp_format and columns_to_validate_timestamp):
         return {"date_column": "None", "timestamp_column": "None", "number_of_date_columns": 0, "number_of_timestamp_columns": 0, "datetime_issues_percentage": 'None'}

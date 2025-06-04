@@ -19,14 +19,18 @@ def check_date_or_timestamp_fields(df, imputed_columns=None):
     if imputed_columns is None:
         return {"date_or_timestamp_fields_found": 'None',
             "date_or_timestamp_issues_percentage": 'None'}
+    
     date_info = imputed_columns.get("date", {})
     timestamp_info = imputed_columns.get("timestamp", {})
-    date_cols = date_info.get("column", [])
+    
+    date_cols = date_info.get("column", []) if date_info else None
     if isinstance(date_cols, str):
         date_cols = [date_cols]
-    timestamp_cols = timestamp_info.get("column", [])
+    
+    timestamp_cols = timestamp_info.get("column", []) if timestamp_info else None
     if isinstance(timestamp_cols, str):
         timestamp_cols = [timestamp_cols]
+   
     columns_to_validate = []
     if date_cols:
         columns_to_validate += date_cols
@@ -35,8 +39,10 @@ def check_date_or_timestamp_fields(df, imputed_columns=None):
     if not columns_to_validate:
         return {"date_or_timestamp_fields_found": 'None',
             "date_or_timestamp_issues_percentage": 'None'}
+    
     date_or_timestamp_fields_found = []
     overall_pct = 0
+    
     for col in columns_to_validate:
         if col not in df.columns:
             continue
