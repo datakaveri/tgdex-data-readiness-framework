@@ -30,14 +30,16 @@ def load_data_from_directory(directory):
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
         sample = False
-        if file_size > 10**8:  # 100MB
+        if file_size > 5*10**8:  # 500MB
             sample = True
         
         if file.endswith('.csv'):
             with open(file_path, 'rb') as f:
-                result = chardet.detect(f.read())  # or readline if the file is large
+                # Avoid reading large files
+                chunk = f.read(min(100000, file_size))
+                result = chardet.detect(chunk)  
             if sample:
-                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=5000)
+                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=1000000)
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
             else:
                 df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
@@ -46,7 +48,7 @@ def load_data_from_directory(directory):
             if sample:
                 pf = ParquetFile(file_path)
                 schema = pf.schema_arrow
-                first_batch = next(pf.iter_batches(batch_size=5000))
+                first_batch = next(pf.iter_batches(batch_size=1000000))
                 df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
                 df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
                 df = df.infer_objects()
@@ -57,7 +59,7 @@ def load_data_from_directory(directory):
                 df = df.infer_objects()
         elif file.endswith('.json'):
             if sample:
-                df = pd.read_json(file_path, chunksize=5000)
+                df = pd.read_json(file_path, chunksize=1000000)
                 df = pd.concat([chunk for chunk in df])
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
             else:
@@ -75,14 +77,15 @@ def load_data_from_directory(directory):
             file_path = os.path.join(subdirectory_path, file)
             file_size = os.path.getsize(file_path)
             sample = False
-            if file_size > 10**8:  # 100MB
+            if file_size > 5*10**8:  # 500MB
                 sample = True
             
             if file.endswith('.csv'):
                 with open(file_path, 'rb') as f:
-                    result = chardet.detect(f.read())  # or readline if the file is large
+                    chunk = f.read(min(100000, file_size))
+                    result = chardet.detect(chunk)  
                 if sample:
-                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=5000)
+                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=1000000)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
                 else:
                     df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
@@ -91,7 +94,7 @@ def load_data_from_directory(directory):
                 if sample:
                     pf = ParquetFile(file_path)
                     schema = pf.schema_arrow
-                    first_batch = next(pf.iter_batches(batch_size=5000))
+                    first_batch = next(pf.iter_batches(batch_size=1000000))
                     df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
                     df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
                     df = df.infer_objects()
@@ -102,7 +105,7 @@ def load_data_from_directory(directory):
                     df = df.infer_objects()
             elif file.endswith('.json'):
                 if sample:
-                    df = pd.read_json(file_path, chunksize=5000)
+                    df = pd.read_json(file_path, chunksize=1000000)
                     df = pd.concat([chunk for chunk in df])
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
                 else:
