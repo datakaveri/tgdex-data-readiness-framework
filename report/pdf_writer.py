@@ -3,7 +3,7 @@ import json
 import datetime
 
 class PDFReport(FPDF):
-    def __init__(self, dataset_name, total_score, total_weights, logo_path=None):
+    def __init__(self, dataset_name, total_score, total_weights, logo_path=None, sample=False):
         """
         Constructor for PDFReport
 
@@ -17,7 +17,11 @@ class PDFReport(FPDF):
             Path to the logo to be displayed on the top left of the report, by default None
         """
         super().__init__()
-        self.dataset_name = dataset_name
+        self.sample = sample
+        if self.sample:
+            self.dataset_name = f"{dataset_name} (Sampled - 5000 rows)"
+        else:
+            self.dataset_name = dataset_name
         self.total_score = total_score
         self.total_weights = total_weights
         self.percent_score = total_score / total_weights * 100
@@ -101,22 +105,43 @@ class PDFReport(FPDF):
                 self.set_text_color(0, 0, 0)  # Black text
                 self.set_font("Helvetica", '', 9)
 
-            # Render each test
             test_num = 1
             for test in section['tests']:
-                self.cell(col_widths[0], 8, f"{section_num}.{test_num}", border=1)
-                self.cell(col_widths[1], 8, test['title'], border=1)
-                test_num += 1
+                # Save starting X and Y
+                x_start = self.get_x()
+                y_start = self.get_y()
 
-                # Summary Notes (multi-line)
-                x, y = self.get_x(), self.get_y()
-                self.multi_cell(col_widths[2], 8, test['note'], border=1)
-                height = self.get_y() - y
-                self.set_xy(x + col_widths[2], y)
-    
-                self.cell(col_widths[3], height, f"{test['score']:.2f}", border=1, align='C', fill=True)
-                self.cell(col_widths[4], height, f"{test['max_score']:.0f}", border=1, align='C', fill=True)
-                self.ln()
+                # Calculate height required for the 'note' cell
+                note_text = test['note']
+                note_width = col_widths[2]
+                note_line_height = 8
+                note_lines = self.multi_cell(note_width, note_line_height, note_text, border=0, split_only=True)
+                note_height = note_line_height * len(note_lines)
+
+                # Draw cell 1: test number
+                self.set_xy(x_start, y_start)
+                self.multi_cell(col_widths[0], note_height, f"{section_num}.{test_num}", border=1)
+
+                # Draw cell 2: title
+                self.set_xy(x_start + col_widths[0], y_start)
+                self.multi_cell(col_widths[1], note_height, test['title'], border=1)
+
+                # Draw cell 3: note (multi-line content)
+                self.set_xy(x_start + col_widths[0] + col_widths[1], y_start)
+                self.multi_cell(col_widths[2], note_line_height, note_text, border=1)
+
+                # Draw cell 4: score
+                self.set_xy(x_start + col_widths[0] + col_widths[1] + col_widths[2], y_start)
+                self.cell(col_widths[3], note_height, f"{test['score']:.2f}", border=1, align='C', fill=True)
+
+                # Draw cell 5: max score
+                self.set_xy(x_start + col_widths[0] + col_widths[1] + col_widths[2] + col_widths[3], y_start)
+                self.cell(col_widths[4], note_height, f"{test['max_score']:.0f}", border=1, align='C', fill=True)
+
+                # Move to the next line
+                self.set_y(y_start + note_height)
+
+                test_num += 1
         
             # Total score for each bucket
             self.set_font("Helvetica", 'B', 10)
@@ -127,7 +152,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None, sample=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -152,6 +177,6 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, to
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path)
+    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path, sample)
     pdf.render_table(data)
     pdf.output(output_path)
