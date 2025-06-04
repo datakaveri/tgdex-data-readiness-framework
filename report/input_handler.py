@@ -1,6 +1,8 @@
 import os
 import pandas as pd
 import chardet
+import pyarrow as pa
+from pyarrow.parquet import ParquetFile
 
 def load_data_from_directory(directory):
     # Assuming the directory contains only CSV, Parquet and JSON files
@@ -26,16 +28,43 @@ def load_data_from_directory(directory):
     
     for file in files:
         file_path = os.path.join(directory, file)
+        file_size = os.path.getsize(file_path)
+        sample = False
+        if file_size > 10**8:  # 100MB
+            sample = True
+        
         if file.endswith('.csv'):
             with open(file_path, 'rb') as f:
                 result = chardet.detect(f.read())  # or readline if the file is large
-            df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+            if sample:
+                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=5000)
+                df = df.infer_objects()  # Convert dtypes to pandas dtypes
+            else:
+                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+                df = df.infer_objects()  # Convert dtypes to pandas dtypes
         elif file.endswith('.parquet'):
-            df = pd.read_parquet(file_path)
+            if sample:
+                pf = ParquetFile(file_path)
+                schema = pf.schema_arrow
+                first_batch = next(pf.iter_batches(batch_size=5000))
+                df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
+                df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
+                df = df.infer_objects()
+            else:
+                table = pa.parquet.read_table(file_path, columns=None)
+                df = table.to_pandas(types_mapper=pd.ArrowDtype)
+                df = df.convert_dtypes(dtype_backend='pyarrow')  # Convert dtypes to pandas dtypes
+                df = df.infer_objects()
         elif file.endswith('.json'):
-            df = pd.read_json(file_path)
-        data.append((df, file_path))
-    
+            if sample:
+                df = pd.read_json(file_path, chunksize=5000)
+                df = pd.concat([chunk for chunk in df])
+                df = df.infer_objects()  # Convert dtypes to pandas dtypes
+            else:
+                df = pd.read_json(file_path)
+                df = df.infer_objects()  # Convert dtypes to pandas dtypes
+        data.append((df, file_path, sample))
+
     for subdirectory in subdirectories:
         subdirectory_path = os.path.join(directory, subdirectory)
         csv_files = [file for file in os.listdir(subdirectory_path) if file.endswith('.csv')]
@@ -44,15 +73,42 @@ def load_data_from_directory(directory):
         
         for file in csv_files + parquet_files + json_files:
             file_path = os.path.join(subdirectory_path, file)
+            file_size = os.path.getsize(file_path)
+            sample = False
+            if file_size > 10**8:  # 100MB
+                sample = True
+            
             if file.endswith('.csv'):
                 with open(file_path, 'rb') as f:
                     result = chardet.detect(f.read())  # or readline if the file is large
-                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+                if sample:
+                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=5000)
+                    df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                else:
+                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+                    df = df.infer_objects()  # Convert dtypes to pandas dtypes
             elif file.endswith('.parquet'):
-                df = pd.read_parquet(file_path)
+                if sample:
+                    pf = ParquetFile(file_path)
+                    schema = pf.schema_arrow
+                    first_batch = next(pf.iter_batches(batch_size=5000))
+                    df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
+                    df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
+                    df = df.infer_objects()
+                else:
+                    table = pa.parquet.read_table(file_path, columns=None)
+                    df = table.to_pandas(types_mapper=pd.ArrowDtype)
+                    df = df.convert_dtypes(dtype_backend='pyarrow')  # Convert dtypes to pandas dtypes
+                    df = df.infer_objects()
             elif file.endswith('.json'):
-                df = pd.read_json(file_path)
-            data.append((df, file_path))
+                if sample:
+                    df = pd.read_json(file_path, chunksize=5000)
+                    df = pd.concat([chunk for chunk in df])
+                    df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                else:
+                    df = pd.read_json(file_path)
+                    df = df.infer_objects()  # Convert dtypes to pandas dtypes
+            data.append((df, file_path, sample))
     
     return data
 
