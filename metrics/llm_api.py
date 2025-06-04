@@ -22,21 +22,27 @@ def infer_column_roles_openai(df, api_key):
 
 "3. A column most likely representing a **timestamp** (e.g., created_at, updated_at). Also return the most likely Python datetime format string (e.g., %Y-%m-%d %H:%M:%S) that can be used to parse them with datetime.strptime(). If there are variations, include those exactly in the format string."
 
+"4. A column most likely representing a **categorical** feature. This includes columns that represent finite sets of options, such as a list of colors, a set of shapes, a list of animals, a set of occupations, a set of educational levels, etc."
+"Note that categorical features are not typically continuous, but rather take on a set of discrete values. "
+"Also, the first 5 rows of data may be used to help make this inference."
+
 "Use the first few rows of data to help make your judgment."
 
 "Return your answer as a JSON object with this structure:\n"
 "{\n"
 '  "region": ["ordered_list_of_column_names"],\n'
 '  "date": {\n'
-'    "column": "column_name_or_null",\n'
-'    "format": "date_format_or_null"\n'
+'    "column": "["ordered_list_of_date_columns"]",\n'
+'    "format": "["ordered_list_of_date_formats"]"\n'
 "  },\n"
 '  "timestamp": {\n'
-'    "column": "column_name_or_null",\n'
-'    "format": "timestamp_format_or_null"\n'
+'    "column": "["ordered_list_of_timestamp_columns"]",\n'
+'    "format": "["ordered_list_of_timestamp_formats"]"\n'
+"  },\n"
+'  "categorical": ["ordered_list_of_categorical_columns"]\n'
 "}\n"
 
-"If no match is found for a category, use null.\n"
+"If no match is found for a category, return null.\n"
 
     )
 
