@@ -39,7 +39,7 @@ def check_numeric_variance(df, cv_threshold=0.1):
         "numeric_columns": numeric_cols.columns.tolist()
     }
 
-def check_categorical_variation(df, imputed_columns=None, dominance_threshold=0.80):
+def check_categorical_variation(df, imputed_columns=None, dominance_threshold=0.99):
     """
     This function takes a DataFrame and a threshold for dominance and 
     checks which categorical columns have a single category that dominates 
@@ -50,7 +50,7 @@ def check_categorical_variation(df, imputed_columns=None, dominance_threshold=0.
     df : pandas.DataFrame
         The DataFrame to check for columns with dominating categories.
     dominance_threshold : float, optional
-        The threshold for dominance. Defaults to 0.80.
+        The threshold for dominance. Defaults to 0.99.
 
     Returns
     -------
