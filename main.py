@@ -90,11 +90,11 @@ def main(directory):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    directory = os.environ.get("DIRECTORY")
-    if directory is None:
-        print("Error: DIRECTORY environment variable not set")
-    else:
-        main(directory)
+    # directory = os.environ.get("DIRECTORY")
+    # if directory is None:
+    #     print("Error: DIRECTORY environment variable not set")
+    # else:
+    main()
 
 
 
