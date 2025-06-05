@@ -84,7 +84,7 @@ def main():
 
             pdf_output = "outputReports/average_score_data_readiness_report.pdf"
             logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-            generate_pdf_from_json("outputReports/average_score_final_readiness_report.json", pdf_output, os.path.basename(directory), raw_avg_report["total_score"], raw_avg_report["total_weights"], logo_path)
+            generate_pdf_from_json("outputReports/average_score_final_readiness_report.json", pdf_output, os.path.basename(directory), raw_avg_report["total_score"], raw_avg_report["total_weights"], logo_path, average_report=True)
             print("Average score report generated for all datasets")
     except Exception as e:
         print(f"Error: {e}")

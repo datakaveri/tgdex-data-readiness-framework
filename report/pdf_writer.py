@@ -3,7 +3,7 @@ import json
 import datetime
 
 class PDFReport(FPDF):
-    def __init__(self, dataset_name, total_score, total_weights, logo_path=None, sample=False):
+    def __init__(self, dataset_name, total_score, total_weights, logo_path=None, sample=False, average_report=False):
         """
         Constructor for PDFReport
 
@@ -18,6 +18,11 @@ class PDFReport(FPDF):
         """
         super().__init__()
         self.sample = sample
+        self.average_report = average_report
+        if self.average_report:
+            dataset_name = f"{dataset_name} - Average Report"
+        else:
+            dataset_name = dataset_name
         if self.sample:
             self.dataset_name = f"{dataset_name} (Sampled)"
         else:
@@ -152,7 +157,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None, sample=False):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None, sample=False, average_report=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -177,6 +182,6 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, to
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path, sample)
+    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path, sample, average_report)
     pdf.render_table(data)
     pdf.output(output_path)
