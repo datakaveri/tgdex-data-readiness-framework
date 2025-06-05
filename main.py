@@ -12,7 +12,7 @@ from metrics.llm_api import infer_column_roles_openai
 load_dotenv()  
 api_key = os.getenv("OPENAI_API_KEY")
 
-def main():
+def main(directory):
     """
     Main function to run the entire data readiness report pipeline.
 
@@ -27,7 +27,7 @@ def main():
     7. Generate a PDF report for each file.
     8. If there are multiple files, generate a report with the average score across all the files.
     """
-    directory = input("Enter the directory containing data files: ")
+    # directory = input("Enter the directory containing data files: ")
 
     try:
         data = input_handler.load_data_from_directory(''+directory)
@@ -90,6 +90,12 @@ def main():
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    main()
+    directory = os.environ.get("DIRECTORY")
+    if directory is None:
+        print("Error: DIRECTORY environment variable not set")
+    else:
+        main(directory)
+
+
 
 
