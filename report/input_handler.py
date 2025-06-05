@@ -36,13 +36,16 @@ def load_data_from_directory(directory):
         if file.endswith('.csv'):
             with open(file_path, 'rb') as f:
                 # Avoid reading large files
-                chunk = f.read(min(100000, file_size))
-                result = chardet.detect(chunk)  
+                chunk = f.read(10000)
+                result = chardet.detect(chunk)
+                encoding = result['encoding']
+                if encoding is not None and encoding.lower() == 'ascii':
+                    encoding = 'utf-8'
             if sample:
-                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=1000000)
+                df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
             else:
-                df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+                df = pd.read_csv(file_path, engine='python', encoding=encoding)
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
         elif file.endswith('.parquet'):
             if sample:
@@ -82,13 +85,14 @@ def load_data_from_directory(directory):
             
             if file.endswith('.csv'):
                 with open(file_path, 'rb') as f:
-                    chunk = f.read(min(100000, file_size))
-                    result = chardet.detect(chunk)  
+                    chunk = f.read(10000)
+                    result = chardet.detect(chunk)
+                    encoding = result['encoding']
                 if sample:
-                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'], nrows=1000000)
+                    df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
                 else:
-                    df = pd.read_csv(file_path, engine='python', encoding=result['encoding'])
+                    df = pd.read_csv(file_path, engine='python', encoding=encoding)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
             elif file.endswith('.parquet'):
                 if sample:
