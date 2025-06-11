@@ -3,7 +3,20 @@ import json
 import datetime
 
 class PDFReport(FPDF):
-    def __init__(self, dataset_name, total_score, total_weights, logo_path=None, sample=False, average_report=False):
+    @staticmethod
+    def sanitize_text(text):
+        # Replace common Unicode dashes and quotes with ASCII equivalents
+        if not isinstance(text, str):
+            return text
+        return (
+            text.replace('\u2013', '-')
+                .replace('\u2014', '-') 
+                .replace('\u2018', "'")
+                .replace('\u2019', "'")
+                .replace('\u201c', '"')
+                .replace('\u201d', '"')
+        )
+    def __init__(self, dataset_name, total_score, total_weights, directory, true_name, logo_path=None, sample=False, average_report=False):
         """
         Constructor for PDFReport
 
@@ -19,14 +32,14 @@ class PDFReport(FPDF):
         super().__init__()
         self.sample = sample
         self.average_report = average_report
+        self.directory = directory
+        self.true_name = self.sanitize_text(true_name)
         if self.average_report:
-            dataset_name = f"{dataset_name} - Average Report"
+            self.dataset_name = f"{self.true_name} - Average Report"
+        elif self.sample:
+            self.dataset_name = f"{self.true_name} (Sampled)"
         else:
-            dataset_name = dataset_name
-        if self.sample:
-            self.dataset_name = f"{dataset_name} (Sampled)"
-        else:
-            self.dataset_name = dataset_name
+            self.dataset_name = self.true_name
         self.total_score = total_score
         self.total_weights = total_weights
         self.percent_score = total_score / total_weights * 100
@@ -46,6 +59,7 @@ class PDFReport(FPDF):
         self.set_font("Helvetica", '', 10)
         self.set_xy(9, 30)
         self.cell(0, 10, f"Dataset: {self.dataset_name}", ln=True, align='L')
+        # self.cell(0, 10, f"Dataset: {self.dataset_name}", ln=True, align='L')
 
         self.set_font("Helvetica", '', 10)
         self.set_xy(9, 35)
@@ -157,7 +171,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, logo_path=None, sample=False, average_report=False):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, directory, true_name, logo_path=None, sample=False, average_report=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -182,6 +196,7 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, to
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, total_weights, logo_path, sample, average_report)
+    pdf = PDFReport(dataset_name, total_score, total_weights, directory, true_name, logo_path, sample, average_report)
     pdf.render_table(data)
+    # pdf.output(dest=output_path).encode('utf-8','ignore')
     pdf.output(output_path)
