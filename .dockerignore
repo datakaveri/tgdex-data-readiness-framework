@@ -11,6 +11,4 @@ scripts/btb_dqap/
 drr-tgdex/
 .coverage
 layer/
-data_readiness_layer.zip
-lambda_function_zip.py
-awscliv2.zip
+local_lambda_tester.py
