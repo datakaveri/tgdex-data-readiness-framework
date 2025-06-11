@@ -1,0 +1,16 @@
+dqa/
+data/
+tests/__pycache__/
+metrics/__pycache__/
+report/__pycache__/
+settings.json
+outputReports/
+.gitignore
+.env
+scripts/btb_dqap/
+drr-tgdex/
+.coverage
+layer/
+data_readiness_layer.zip
+lambda_function_zip.py
+awscliv2.zip
