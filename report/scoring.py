@@ -130,6 +130,7 @@ def compute_aggregate_score(report_dict, df):
     final_report = {
         "total_weights": sum(weights.values()),
         "total_score": round(total_score, 2),
+        "total_percentage": round(total_score / sum(weights.values()) * 100, 2),
         "detailed_scores": detailed_scores
     }
     
