@@ -30,17 +30,17 @@ def load_data_from_directory(directory):
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
         sample = False
-        if file_size > 5*10**8:  # 500MB
+        if file_size > 1*10**8:  # 100MB
             sample = True
         
         if file.endswith('.csv'):
             with open(file_path, 'rb') as f:
                 # Avoid reading large files
-                chunk = f.read(10000)
-                result = chardet.detect(chunk)
-                encoding = result['encoding']
-                if encoding is not None and encoding.lower() == 'ascii':
-                    encoding = 'utf-8'
+                # chunk = f.read(10000)
+                # result = chardet.detect(chunk)
+                # encoding = result['encoding']
+                # if encoding is not None and encoding.lower() == 'ascii':
+                encoding = 'utf-8'
             if sample:
                 df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
