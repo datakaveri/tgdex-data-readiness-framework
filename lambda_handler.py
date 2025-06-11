@@ -122,11 +122,9 @@ def lambda_handler(event, context):
             # Upload reports to S3
             for root, _, files in os.walk(temp_dir):
                 for f in files:
-                    if f.endswith('.json'):
+                    if f.endswith(('.json', '.pdf')):
                         report_key = f"data-readiness-reports/{os.path.basename(root)}/{f}"
                         s3_client.upload_file(os.path.join(root, f), bucket_name, report_key)
-        
-        
         end_time = time.time()
         logger.info(f"Lambda invocation completed - RequestID: {request_id}")
         logger.info(f"Total execution time: {end_time - start_time:.2f} seconds")
