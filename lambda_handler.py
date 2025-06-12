@@ -157,7 +157,7 @@ def lambda_handler(event, context):
                                     'body': json.dumps({'error': 'Server configuration error: Missing S3_REPORTS_BUCKET_NAME'})
                                 }
                             logger.info(f"Uploading report: {f} to bucket: {reports_bucket_name}")
-                            report_key = f"{os.path.basename(temp_dir)}/{f}"
+                            report_key = f"{os.path.basename(folder_key)}/{f}"
                             logger.info(f"Report key: {report_key}")
                             s3_client.upload_file(os.path.join(root, f), reports_bucket_name, report_key)   
                             logger.info(f"Uploaded report to S3: {report_key}")
