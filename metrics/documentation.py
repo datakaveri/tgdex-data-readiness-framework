@@ -20,11 +20,12 @@ def check_documentation_presence(descriptor_path):
 
     valid_file_names = [name.lower() for name in ["dataset_metadata", "README", "data_description", "data_description_file", "data_attributes"]]
     valid_extensions = [ext.lower() for ext in [".txt", ".json", ".md", ".csv"]]
-    exists = False
-    for f in valid_file_names:
-        for ext in valid_extensions:
-            if os.path.exists(os.path.join(descriptor_path, f + ext)):
-                exists = True
-                break
-    return {"documentation_found": exists}
+    for filename in os.listdir(descriptor_path):
+        name, ext = os.path.splitext(filename)
+        name_lower = name.lower()
+        ext_lower = ext.lower()
 
+        if ext_lower in valid_extensions:
+            if name_lower in valid_file_names or "metadata" in name_lower:
+                return {"documentation_found": True}
+    return {"documentation_found": False}
