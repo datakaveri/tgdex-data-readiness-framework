@@ -1,8 +1,12 @@
+print("Starting input_handler.py")
 import os
 import pandas as pd
 import chardet
+import logging
 import pyarrow as pa
 from pyarrow.parquet import ParquetFile
+print("Importing modules completed in input_handler.py")
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_data_from_directory(directory):
     # Assuming the directory contains only CSV, Parquet and JSON files
@@ -25,7 +29,12 @@ def load_data_from_directory(directory):
     data = []
     files = [file for file in os.listdir(directory) if file.endswith(('.csv', '.parquet', '.json')) and 'metadata' not in file]
     subdirectories = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
-    
+    logging.info(f"Found {len(files)} files and {len(subdirectories)} subdirectories in {directory}")
+    if not files and not subdirectories:
+        logging.error(f"No data files found in the specified directory: {directory}")
+        return []
+    logging.info(f"Files found: {files}")
+    logging.info(f"Subdirectories found: {subdirectories}")
     for file in files:
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
@@ -69,6 +78,7 @@ def load_data_from_directory(directory):
                 df = pd.read_json(file_path)
                 df = df.infer_objects()  # Convert dtypes to pandas dtypes
         data.append((df, file_path, sample))
+        logging.info(f"Loaded file: {file_path}")
 
     for subdirectory in subdirectories:
         subdirectory_path = os.path.join(directory, subdirectory)
@@ -116,6 +126,7 @@ def load_data_from_directory(directory):
                     df = pd.read_json(file_path)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
             data.append((df, file_path, sample))
+            logging.info(f"Loaded file: {file_path}")
     
     return data
 
