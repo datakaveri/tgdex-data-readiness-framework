@@ -23,7 +23,7 @@ logging.info("OpenAI API key loaded successfully.")
 def get_output_dir(directory):
     # Use /tmp/outputReports in Lambda, else local outputReports
     if os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
-        return directory
+        return os.path.join("/tmp", os.path.basename(directory))
     else:
         return f"outputReports/{os.path.basename(directory)}"
 
@@ -78,25 +78,23 @@ def main(directory, folder_key):
                 final_score = log_and_call(scoring.compute_aggregate_score, init_report, df)
                 
                 # Create a directory to hold all the generated files
-                output_dir = get_output_dir(folder_key)
-                if not os.path.exists(folder_key):
-                    os.makedirs(folder_key)
+                output_dir = get_output_dir(directory)
 
                 # Write the raw and final reports to JSON files
-                log_and_call(write_report_outputs, final_score, output_dir, dataset_name, init_report)
-                final_report = log_and_call(generate_final_report, f"{output_dir}/{folder_key}_raw_readiness_report.json")
-                with open(f"{output_dir}/{folder_key}_final_readiness_report.json", "w") as f:
+                log_and_call(write_report_outputs, final_score, output_dir, uuid, init_report)
+                final_report = log_and_call(generate_final_report, f"{output_dir}/{uuid}_raw_readiness_report.json")
+                with open(f"{output_dir}/{uuid}_final_readiness_report.json", "w") as f:
                     json.dump(final_report, f, indent=4)
                 logging.info(f"Report generated for {file_path}")
                 
                 # Generate a PDF report
-                pdf_output = f"{output_dir}/{folder_key}_data_readiness_report.pdf"
+                pdf_output = f"{output_dir}/{uuid}_data_readiness_report.pdf"
                 logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"
-                log_and_call(generate_pdf_from_json, f"{output_dir}/{folder_key}_final_readiness_report.json", pdf_output, folder_key, final_score["total_score"], final_score["total_weights"], directory, true_name, logo_path, sample)
+                log_and_call(generate_pdf_from_json, f"{output_dir}/{uuid}_final_readiness_report.json", pdf_output, uuid, final_score["total_score"], final_score["total_weights"], output_dir, true_name, logo_path, sample)
                 logging.info(f"PDF generated for {file_path}")
                 
                 all_scores.append(final_score)
-                report_names = [f"{output_dir}/{folder_key}_raw_readiness_report.json" for _, file_path, _ in data]
+                report_names = [f"{output_dir}/{uuid}_raw_readiness_report.json" for _, file_path, _ in data]
 
             except Exception as e:
                 logging.error(f"Error processing {file_path}: {e}")
@@ -107,16 +105,16 @@ def main(directory, folder_key):
             output_dir = get_output_dir(directory)
             raw_avg_report = log_and_call(calculate_average_readiness, report_names)
 
-            with open(f"{output_dir}/{folder_key}_average_score_readiness_report.json", "w") as f:
+            with open(f"{output_dir}/{uuid}_average_score_readiness_report.json", "w") as f:
                 json.dump(raw_avg_report, f, indent=4)
 
-            final_avg_report = log_and_call(generate_final_report, f"{output_dir}/{folder_key}_average_score_readiness_report.json")
-            with open(f"{output_dir}/{folder_key}_average_score_final_readiness_report.json", "w") as f:
+            final_avg_report = log_and_call(generate_final_report, f"{output_dir}/{uuid}_average_score_readiness_report.json")
+            with open(f"{output_dir}/{uuid}_average_score_final_readiness_report.json", "w") as f:
                 json.dump(final_avg_report, f, indent=4)
 
-            pdf_output = f"{output_dir}/{folder_key}_average_score_data_readiness_report.pdf"
+            pdf_output = f"{output_dir}/{uuid}_average_score_data_readiness_report.pdf"
             logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-            log_and_call(generate_pdf_from_json, f"{output_dir}/{folder_key}_average_score_final_readiness_report.json", pdf_output, os.path.basename(directory), raw_avg_report["total_score"], raw_avg_report["total_weights"], directory, true_name, logo_path, average_report=True)
+            log_and_call(generate_pdf_from_json, f"{output_dir}/{uuid}_average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_score"], raw_avg_report["total_weights"], output_dir, true_name, logo_path, average_report=True)
             logging.info("Average score report generated for all datasets")
     except Exception as e:
         logging.error(f"Error: {e}")
