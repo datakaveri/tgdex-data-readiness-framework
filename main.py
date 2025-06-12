@@ -76,7 +76,9 @@ def main(directory, folder_key):
                 
                 # Compute the aggregate score
                 final_score = log_and_call(scoring.compute_aggregate_score, init_report, df)
-                
+                final_percentage = final_score.get("total_percentage")
+                final_percentage = str(final_percentage) if final_percentage is not None else "unknown"
+
                 # Create a directory to hold all the generated files
                 output_dir = get_output_dir(directory)
 
@@ -116,6 +118,7 @@ def main(directory, folder_key):
             logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
             log_and_call(generate_pdf_from_json, f"{output_dir}/{uuid}_average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_score"], raw_avg_report["total_weights"], output_dir, true_name, logo_path, average_report=True)
             logging.info("Average score report generated for all datasets")
+        return final_percentage
     except Exception as e:
         logging.error(f"Error: {e}")
 
