@@ -1,8 +1,8 @@
 import requests
 
 url_format = 'https://dx.tgdex.telangana.gov.in/tgdex/cat/v1/item?id={}'
-def get_uuid_from_dataset_name(dataset_name):
-    return dataset_name.split('.')[0]
+def get_uuid_from_dataset_name(folder_name):
+    return folder_name.split('.')[0]
 
 def get_dataset_name_from_url(uuid, url_format=url_format):
     # uuid = url.split('=')[-1]
