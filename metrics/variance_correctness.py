@@ -1,3 +1,5 @@
+import pandas as pd
+
 def check_numeric_variance(df, cv_threshold=0.1):
 
     """
@@ -27,9 +29,11 @@ def check_numeric_variance(df, cv_threshold=0.1):
     low_variance_cols = []
     for col in numeric_cols:
         mean = df[col].mean()
-        if mean == 0:
+        std = df[col].std()
+        # Check for NA in mean or std
+        if pd.isna(mean) or mean == 0 or pd.isna(std):
             continue
-        if df[col].std() / mean < cv_threshold:
+        if std / mean < cv_threshold:
             low_variance_cols.append(col)
     
     return {
