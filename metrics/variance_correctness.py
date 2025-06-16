@@ -38,7 +38,7 @@ def check_numeric_variance(df, cv_threshold=0.1):
     
     return {
         "low_variance_numeric_columns": low_variance_cols,
-        "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 2),
+        "percentage_low_variance_numeric_columns": round(len(low_variance_cols) / numeric_cols.shape[1] * 100, 1),
         "number_of_numeric_columns": numeric_cols.shape[1],
         "numeric_columns": numeric_cols.columns.tolist()
     }
@@ -77,7 +77,7 @@ def check_categorical_variation(df, imputed_columns=None, dominance_threshold=0.
                 dominant_cols.append(col)
     return {
         "dominant_categorical_columns": dominant_cols,
-        "percentage_dominant_categorical_columns": round(len(dominant_cols) / len(categorical_cols) * 100, 2),
+        "percentage_dominant_categorical_columns": round(len(dominant_cols) / len(categorical_cols) * 100, 1),
         "number_of_categorical_columns": len(categorical_cols),
         "categorical_columns": categorical_cols
     }

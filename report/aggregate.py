@@ -87,6 +87,7 @@ def generate_final_report(readiness_metrics_json_path):
             "date_or_timestamp_fields_found": 10,
             "documentation_presence": 15,
         }
+        
         return {
             "column_missing": 
             f"All {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
@@ -96,26 +97,26 @@ def generate_final_report(readiness_metrics_json_path):
             "row_missing": 
             f"All {readiness_metrics_raw['number_of_rows']} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
             else 
-            f"{readiness_metrics_raw['number_of_rows'] - readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({100 - readiness_metrics_raw['row_missing_percentage']:.1f}%) have at least 50% of fields populated.",
+            f"{readiness_metrics_raw['number_of_rows'] - readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({round(100 - readiness_metrics_raw['row_missing_percentage'], 1)}%) have at least 50% of fields populated.",
 
             "exact_row_duplicates": 
             f"100% of rows are unique with no duplicates detected." if readiness_metrics_raw["detailed_scores"]["exact_row_duplicates"] == max_scores["exact_row_duplicates"] 
             else 
-            f"{100 - readiness_metrics_raw['exact_row_duplicates_percentage']:.1f}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates']} duplicate rows identified.",
+            f"{round(100 - readiness_metrics_raw['exact_row_duplicates_percentage'], 1)}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates']} duplicate rows identified.",
             
             "coverage_check": (
                 "No region columns found." if readiness_metrics_raw["region_coverage"] == 'None'
                 else (
                     f"100% coverage achieved across all regional columns."
                     if "region_coverage" in readiness_metrics_raw and readiness_metrics_raw["detailed_scores"]["coverage_check"] == max_scores["coverage_check"]
-                    else f"{(100 - readiness_metrics_raw['region_coverage']):.2f}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
+                    else f"{round(100 - readiness_metrics_raw['region_coverage'], 1)}% coverage achieved across {len(readiness_metrics_raw['region_column'])} regional columns."
                 )
             ),
             
             "numeric_variance": 
             "No numeric columns found." if readiness_metrics_raw["number_of_numeric_columns"] == 0 
             else (
-                f"All {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation." 
+                f"All {readiness_metrics_raw['number_of_numeric_columns']} numeric column(s) show sufficient statistical variation." 
                 if readiness_metrics_raw["detailed_scores"]["numeric_variance"] == max_scores["numeric_variance"] 
                 else 
                 f"{readiness_metrics_raw['number_of_numeric_columns'] - len(readiness_metrics_raw['low_variance_numeric_columns'])} out of {readiness_metrics_raw['number_of_numeric_columns']} numeric columns show sufficient statistical variation."
@@ -124,7 +125,7 @@ def generate_final_report(readiness_metrics_json_path):
             "categorical_variation": 
             "No categorical columns found." if readiness_metrics_raw["number_of_categorical_columns"] == 0 
             else (
-                f"All {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values." 
+                f"All {readiness_metrics_raw['number_of_categorical_columns']} categorical column(s) have a balanced distribution of values." 
                 if readiness_metrics_raw["detailed_scores"]["categorical_variation"] == max_scores["categorical_variation"] 
                 else 
                 f"{readiness_metrics_raw['number_of_categorical_columns'] - len(readiness_metrics_raw['dominant_categorical_columns'])} out of {readiness_metrics_raw['number_of_categorical_columns']} categorical columns have a balanced distribution of values."
@@ -152,7 +153,7 @@ def generate_final_report(readiness_metrics_json_path):
                 else ( 
                     f"100% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields." if readiness_metrics_raw["detailed_scores"]["date_or_timestamp_fields_found"] == max_scores["date_or_timestamp_fields_found"] 
                     else 
-                    f"{100 - readiness_metrics_raw['date_or_timestamp_issues_percentage']}% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields."
+                    f"{round(100 - readiness_metrics_raw['date_or_timestamp_issues_percentage'], 1)}% of values are populated across {len(readiness_metrics_raw['date_or_timestamp_fields_found'])} datetime fields."
                 )
             ),
 
@@ -198,7 +199,7 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Data Relevance and Completeness",
-            "weight": 0 if notes["coverage_check"] == "No region columns found." else 10,
+            "weight": 0 if notes["coverage_check"] == "No region columns found." or detailed_scores["coverage_check"] == 0 else 10,
             "tests": [
                 {
                     "id": "2.1",
@@ -206,7 +207,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Coverage Check",
                     "note": notes["coverage_check"],
                     "score": detailed_scores["coverage_check"],
-                    "max_score": 0 if notes["coverage_check"] == "No region columns found." else 10
+                    "max_score": 0 if notes["coverage_check"] == "No region columns found." or detailed_scores["coverage_check"] == 0 else 10
                 },
             ]
         },
@@ -236,7 +237,7 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Standardisation",
-            "weight": 10 if notes["uniform_encoding"] == "No date or time columns found." else 20,
+            "weight": 10 if notes["uniform_encoding"] == "No date or time columns found." or detailed_scores["uniform_encoding"] == 0 else 20,
             "tests": [
                 {
                     "id": "4.1",
@@ -252,13 +253,13 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Uniform Encoding",
                     "note": notes["uniform_encoding"],
                     "score": detailed_scores["uniform_encoding"],
-                    "max_score": 0 if notes["uniform_encoding"] == "No date or time columns found." else 10
+                    "max_score": 0 if notes["uniform_encoding"] == "No date or time columns found." or detailed_scores["uniform_encoding"] == 0 else 10
                 }
             ]
         },
         {
             "bucket": "Regular Refresh",
-            "weight": 0 if notes["date_or_timestamp_fields_found"] == "No date or timestamp fields found" else 10,
+            "weight": 0 if notes["date_or_timestamp_fields_found"] == "No date or timestamp fields found" or detailed_scores["date_or_timestamp_issues_percentage"] == 0 else 10,
             "tests": [
                 {
                     "id": "5.1",
@@ -266,7 +267,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "DateTime Fields Presence",
                     "note": notes["date_or_timestamp_fields_found"],
                     "score": detailed_scores["date_or_timestamp_fields_found"],
-                    "max_score": 0 if notes["date_or_timestamp_fields_found"] == "No datetime fields found." else 10
+                    "max_score": 0 if notes["date_or_timestamp_fields_found"] == "No datetime fields found." or detailed_scores["date_or_timestamp_fields_found"] == 0 else 10
                 }
             ]
         },
