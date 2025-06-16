@@ -80,6 +80,11 @@ def lambda_handler(event, context):
                     'body': json.dumps({'error': 'Missing folder_key parameter'})
                 }
             
+            if isinstance(folder_key, str):
+                folder_keys = [folder_key]
+            else:
+                folder_keys = folder_key
+
             # Get bucket name from environment variable
             bucket_name = os.environ.get('S3_BUCKET_NAME')
             if not bucket_name:
@@ -91,77 +96,80 @@ def lambda_handler(event, context):
             
             logger.info(f"Using bucket: {bucket_name}")
             
-            # Check if the folder exists in S3
-            logger.info(f"Checking if folder exists: {folder_key}")
-            try:
-                # List objects with the given prefix and limit to 1 result
-                response = s3_client.list_objects_v2(
-                    Bucket=bucket_name,
-                    Prefix=folder_key,
-                    MaxKeys=1
-                )
-                
-                # If no contents or the only item is the folder itself (ends with /)
-                if 'Contents' not in response or (
-                    len(response['Contents']) == 1 and 
-                    response['Contents'][0]['Key'] == folder_key and 
-                    folder_key.endswith('/')
-                ):
-                    logger.error(f"Folder not found or empty: {folder_key}")
+
+            for fk in folder_keys:
+                logger.info(f"Processing folder: {fk}")
+                # Check if the folder exists in S3
+                logger.info(f"Checking if folder exists: {fk}")
+                try:
+                    # List objects with the given prefix and limit to 1 result
+                    response = s3_client.list_objects_v2(
+                        Bucket=bucket_name,
+                        Prefix=fk,
+                        MaxKeys=1
+                    )
+                    
+                    # If no contents or the only item is the folder itself (ends with /)
+                    if 'Contents' not in response or (
+                        len(response['Contents']) == 1 and 
+                        response['Contents'][0]['Key'] == fk and 
+                        fk.endswith('/')
+                    ):
+                        logger.error(f"Folder not found or empty: {fk}")
+                        return {
+                            'statusCode': 404,
+                            'body': json.dumps({
+                                'error': 'Folder not found or empty',
+                                'folder_key': fk
+                            })
+                        }
+                        
+                    logger.info(f"Folder exists: {fk}")
+                except Exception as e:
+                    logger.error(f"Error checking folder existence: {str(e)}", exc_info=True)
                     return {
-                        'statusCode': 404,
+                        'statusCode': 500,
                         'body': json.dumps({
-                            'error': 'Folder not found or empty',
-                            'folder_key': folder_key
+                            'error': 'Error checking folder existence',
+                            'error_message': str(e)
                         })
                     }
-                    
-                logger.info(f"Folder exists: {folder_key}")
-            except Exception as e:
-                logger.error(f"Error checking folder existence: {str(e)}", exc_info=True)
-                return {
-                    'statusCode': 500,
-                    'body': json.dumps({
-                        'error': 'Error checking folder existence',
-                        'error_message': str(e)
-                    })
-                }
-            
-            
-            with tempfile.TemporaryDirectory() as temp_dir:
-                # Download files from S3
-                for obj in s3_client.list_objects_v2(Bucket=bucket_name, Prefix=folder_key).get('Contents', []):
-                    if obj['Key'].endswith('/'):
-                        continue
-                    local_path = os.path.join(temp_dir, os.path.basename(obj['Key']))
-                    s3_client.download_file(bucket_name, obj['Key'], local_path)
-                    # Unzip if required
-                    if local_path.endswith('.zip'):
-                        with zipfile.ZipFile(local_path, 'r') as zf:
-                            zf.extractall(temp_dir)
-                # Run your framework
-                readiness_score = main(temp_dir, folder_key)
-                logger.info("Data readiness framework executed successfully.")
-                # Upload reports to S3
-                for root, _, files in os.walk(temp_dir):
-                    print(root, _, files)
-                    for f in files:
-                        if f.endswith(('.json', '.pdf')):
-                            load_dotenv() 
-                            reports_bucket_name = os.getenv('S3_REPORTS_BUCKET_NAME')
-                            logger.info("Reports bucket name: %s", reports_bucket_name)
-                            if not reports_bucket_name:
-                                logger.error("Missing required environment variable: S3_REPORTS_BUCKET_NAME")
-                                return {
-                                    'statusCode': 500,
-                                    'body': json.dumps({'error': 'Server configuration error: Missing S3_REPORTS_BUCKET_NAME'})
-                                }
-                            logger.info(f"Uploading report: {f} to bucket: {reports_bucket_name}")
-                            report_key = f"{os.path.basename(folder_key)}/{f}"
-                            logger.info(f"Report key: {report_key}")
-                            s3_client.upload_file(os.path.join(root, f), reports_bucket_name, report_key,
-                                                  ExtraArgs={"Metadata": {"readiness_score": readiness_score}})   
-                            logger.info(f"Uploaded report to S3: {report_key}")
+                
+                
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    # Download files from S3
+                    for obj in s3_client.list_objects_v2(Bucket=bucket_name, Prefix=fk).get('Contents', []):
+                        if obj['Key'].endswith('/'):
+                            continue
+                        local_path = os.path.join(temp_dir, os.path.basename(obj['Key']))
+                        s3_client.download_file(bucket_name, obj['Key'], local_path)
+                        # Unzip if required
+                        if local_path.endswith('.zip'):
+                            with zipfile.ZipFile(local_path, 'r') as zf:
+                                zf.extractall(temp_dir)
+                    # Run your framework
+                    readiness_score = main(temp_dir, fk)
+                    logger.info("Data readiness framework executed successfully.")
+                    # Upload reports to S3
+                    for root, _, files in os.walk(temp_dir):
+                        print(root, _, files)
+                        for f in files:
+                            if f.endswith(('.json', '.pdf')):
+                                load_dotenv() 
+                                reports_bucket_name = os.getenv('S3_REPORTS_BUCKET_NAME')
+                                logger.info("Reports bucket name: %s", reports_bucket_name)
+                                if not reports_bucket_name:
+                                    logger.error("Missing required environment variable: S3_REPORTS_BUCKET_NAME")
+                                    return {
+                                        'statusCode': 500,
+                                        'body': json.dumps({'error': 'Server configuration error: Missing S3_REPORTS_BUCKET_NAME'})
+                                    }
+                                logger.info(f"Uploading report: {f} to bucket: {reports_bucket_name}")
+                                report_key = f"{os.path.basename(fk)}/{f}"
+                                logger.info(f"Report key: {report_key}")
+                                s3_client.upload_file(os.path.join(root, f), reports_bucket_name, report_key,
+                                                    ExtraArgs={"Metadata": {"readiness_score": readiness_score}})   
+                                logger.info(f"Uploaded report to S3: {report_key}")
             end_time = time.time()
             logger.info(f"Lambda invocation completed - RequestID: {request_id}")
             logger.info(f"Total execution time: {end_time - start_time:.2f} seconds")
@@ -185,4 +193,5 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps({'error': 'Unhandled top-level error', 'error_message': str(e)})
         }
+
 
