@@ -6,6 +6,12 @@ from metrics.model_ingestible import *
 from metrics.regular_refresh import *
 from metrics.documentation import *
 import json 
+import logging 
+
+def log_and_call(func, *args, **kwargs):
+    logging.info(f"Calling function: {func.__name__}")
+    return func(*args, **kwargs)
+
 
 def generate_raw_report(df, data_file_path, imputed_columns=None):
     """
@@ -26,16 +32,16 @@ def generate_raw_report(df, data_file_path, imputed_columns=None):
         A dictionary containing the raw data quality metrics.
     """
     report = {}
-    report.update(check_column_missing(df))
-    report.update(check_row_missing(df))
-    report.update(check_row_duplicates(df))
-    report.update(check_coverage_region(df, imputed_columns))
-    report.update(check_numeric_variance(df))
-    report.update(check_categorical_variation(df, imputed_columns))
-    report.update(check_file_format(data_file_path))
-    report.update(check_date_and_timestamp_format(df, imputed_columns))
-    report.update(check_date_or_timestamp_fields(df, imputed_columns))
-    report.update(check_documentation_presence(data_file_path))
+    report.update(log_and_call(check_column_missing, df))
+    report.update(log_and_call(check_row_missing, df))
+    report.update(log_and_call(check_row_duplicates, df))
+    report.update(log_and_call(check_coverage_region, df, imputed_columns))
+    report.update(log_and_call(check_numeric_variance, df))
+    report.update(log_and_call(check_categorical_variation, df, imputed_columns))
+    report.update(log_and_call(check_file_format, data_file_path))
+    report.update(log_and_call(check_date_and_timestamp_format, df, imputed_columns))
+    report.update(log_and_call(check_date_or_timestamp_fields, df, imputed_columns))
+    report.update(log_and_call(check_documentation_presence, data_file_path))
     return report
 
 def generate_final_report(readiness_metrics_json_path):
