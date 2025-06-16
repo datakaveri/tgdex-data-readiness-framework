@@ -35,7 +35,7 @@ def check_column_missing(df, threshold=0.3):
     else:
         return {"column_missing": missing_report,
                 "column_missing_count": len(missing_report),
-                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 2),
+                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 1),
                 "number_of_columns": df.shape[1]}
 
 def check_row_missing(df, threshold=0.5):
@@ -59,7 +59,7 @@ def check_row_missing(df, threshold=0.5):
     """
 
     count = df[df.isnull().mean(axis=1) >= threshold].shape[0]
-    percentage = round(count / df.shape[0] * 100, 2) if count > 0 else 0.0
+    percentage = round(count / df.shape[0] * 100, 1) if count > 0 else 0.0
     return {"row_missing_count": count,
             "row_missing_percentage": percentage,
             "number_of_rows": df.shape[0]}
@@ -82,7 +82,7 @@ def check_row_duplicates(df):
         rows with exact duplicates.
     """
     count = int(df.duplicated(keep='first').sum())
-    percentage = round(df.duplicated().mean() * 100, 2) if count > 0 else 0.0
+    percentage = round(df.duplicated().mean() * 100, 1) if count > 0 else 0.0
     return {"exact_row_duplicates": count,
             "exact_row_duplicates_percentage": percentage}  
 
