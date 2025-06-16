@@ -42,13 +42,15 @@ def check_date_or_timestamp_fields(df, imputed_columns=None):
     
     date_or_timestamp_fields_found = []
     overall_pct = 0
+    num_non_null_cols = 0
     
     for col in columns_to_validate:
-        if col not in df.columns:
+        if col not in df.columns or df[col].isnull().all():
             continue
         date_or_timestamp_fields_found.append(col)
         overall_pct += df[col].isnull().mean() * 100
-    overall_pct = round(overall_pct / len(date_or_timestamp_fields_found), 2)
+        num_non_null_cols += 1
+    overall_pct = round(overall_pct / num_non_null_cols, 1)
     return {"date_or_timestamp_fields_found": date_or_timestamp_fields_found,
             "date_or_timestamp_issues_percentage": overall_pct}
 

@@ -68,7 +68,7 @@ def check_date_and_timestamp_format(df, imputed_columns=None):
 
     if columns_to_validate_date is not None:
         for date_col in columns_to_validate_date:
-            if date_col in df.columns:
+            if date_col in df.columns and not df[date_col].isnull().all():
                 date_fields_found.append(date_col)
                 try:
                     parsed = pd.to_datetime(df[date_col], format=expected_date_format, errors="coerce")
@@ -79,7 +79,7 @@ def check_date_and_timestamp_format(df, imputed_columns=None):
     
     if columns_to_validate_timestamp is not None:
         for timestamp_col in columns_to_validate_timestamp:
-            if timestamp_col in df.columns:
+            if timestamp_col in df.columns and not df[timestamp_col].isnull().all():
                 timestamp_fields_found.append(timestamp_col)
                 try:
                     parsed = pd.to_datetime(df[timestamp_col], format=expected_timestamp_format, errors="coerce")
@@ -95,6 +95,6 @@ def check_date_and_timestamp_format(df, imputed_columns=None):
         "timestamp_column": timestamp_fields_found,
         "number_of_date_columns": len(date_fields_found),
         "number_of_timestamp_columns": len(timestamp_fields_found),
-        "datetime_issues_percentage": round(total_issues_count / total_entries * 100, 2) if total_entries > 0 else 0.0
+        "datetime_issues_percentage": round(total_issues_count / total_entries * 100, 1) if total_entries > 0 else 0.0
     }
 
