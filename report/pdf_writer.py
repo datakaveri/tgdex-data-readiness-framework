@@ -16,7 +16,7 @@ class PDFReport(FPDF):
                 .replace('\u201c', '"')
                 .replace('\u201d', '"')
         )
-    def __init__(self, dataset_name, total_score, total_weights, directory, true_name, logo_path=None, sample=False, average_report=False):
+    def __init__(self, dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
         """
         Constructor for PDFReport
 
@@ -37,7 +37,7 @@ class PDFReport(FPDF):
         if self.average_report:
             self.dataset_name = f"{self.true_name} - Average Report"
         elif self.sample:
-            self.dataset_name = f"{self.true_name} (Sampled)"
+            self.dataset_name = f"{self.true_name} (Sampled - {self.sample_size} rows)"
         else:
             self.dataset_name = self.true_name
         self.total_score = total_score
@@ -171,7 +171,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, directory, true_name, logo_path=None, sample=False, average_report=False):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -196,7 +196,7 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, to
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, total_weights, directory, true_name, logo_path, sample, average_report)
+    pdf = PDFReport(dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path, sample, average_report)
     pdf.render_table(data)
     # pdf.output(dest=output_path).encode('utf-8','ignore')
     pdf.output(output_path)
