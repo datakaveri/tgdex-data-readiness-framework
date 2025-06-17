@@ -259,7 +259,7 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Regular Refresh",
-            "weight": 0 if notes["date_or_timestamp_fields_found"] == "No date or timestamp fields found" or detailed_scores["date_or_timestamp_issues_percentage"] == 0 else 10,
+            "weight": 0 if notes["date_or_timestamp_fields_found"] == "No date or timestamp fields found" or detailed_scores["date_or_timestamp_fields_found"] == 0 else 10,
             "tests": [
                 {
                     "id": "5.1",
