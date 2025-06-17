@@ -33,6 +33,7 @@ class PDFReport(FPDF):
         self.sample = sample
         self.average_report = average_report
         self.directory = directory
+        self.sample_size = sample_size
         self.true_name = self.sanitize_text(true_name)
         if self.average_report:
             self.dataset_name = f"{self.true_name} - Average Report"
