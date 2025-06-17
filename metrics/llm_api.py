@@ -7,7 +7,7 @@ def infer_column_roles_openai(df, api_key):
     client = openai.OpenAI(api_key=api_key)
 
     column_names = df.columns.tolist()
-    first_rows = df.head(5).to_dict(orient="records")
+    first_rows = df.head(20).to_dict(orient="records")
 
     system_prompt = (
 "You are a data analyst helping identify key columns in a tabular dataset. "
@@ -48,7 +48,7 @@ def infer_column_roles_openai(df, api_key):
 
     user_prompt = (
         f"Here are the column names:\n{column_names}\n\n"
-        f"And here are the first 5 rows of data:\n{json.dumps([{k: str(v) for k,v in row.items()} for row in first_rows], indent=2)}"
+        f"And here are the first 20 rows of data:\n{json.dumps([{k: str(v) for k,v in row.items()} for row in first_rows], indent=2)}"
     )
 
     response = client.chat.completions.create(
@@ -57,7 +57,8 @@ def infer_column_roles_openai(df, api_key):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ],
-        temperature=0
+        temperature=0,
+        top_p=1
     )
 
     message_content = response.choices[0].message.content
