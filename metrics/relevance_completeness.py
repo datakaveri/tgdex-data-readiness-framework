@@ -35,4 +35,8 @@ def check_coverage_region(df, imputed_columns=None):
         overall_pct += missing_percentage
         num_non_null_cols += 1
     overall_pct = round(overall_pct / num_non_null_cols, 1)
-    return {"region_coverage": overall_pct, "region_column": region_col}
+    print('Overall Percentage for region coverage here is:', overall_pct)
+    if overall_pct == 0.0:
+        return {"region_coverage": 'None', "region_column": region_col}
+    else:
+        return {"region_coverage": overall_pct, "region_column": region_col}
