@@ -16,7 +16,7 @@ class PDFReport(FPDF):
                 .replace('\u201c', '"')
                 .replace('\u201d', '"')
         )
-    def __init__(self, dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
+    def __init__(self, dataset_name, total_percentage, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
         """
         Constructor for PDFReport
 
@@ -41,9 +41,7 @@ class PDFReport(FPDF):
             self.dataset_name = f"{self.true_name} (Sampled - {self.sample_size} rows)"
         else:
             self.dataset_name = self.true_name
-        self.total_score = total_score
-        self.total_weights = total_weights
-        self.percent_score = total_score / total_weights * 100
+        self.percent_score = total_percentage
         self.logo_path = logo_path
         self.set_auto_page_break(auto=True, margin=15)
         self.add_page()
@@ -172,7 +170,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_percentage, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
@@ -197,7 +195,7 @@ def generate_pdf_from_json(json_path, output_path, dataset_name, total_score, to
     with open(json_path, "r") as f:
         data = json.load(f)
 
-    pdf = PDFReport(dataset_name, total_score, total_weights, directory, true_name, sample_size, logo_path, sample, average_report)
+    pdf = PDFReport(dataset_name, total_percentage, directory, true_name, sample_size, logo_path, sample, average_report)
     pdf.render_table(data)
     # pdf.output(dest=output_path).encode('utf-8','ignore')
     pdf.output(output_path)
