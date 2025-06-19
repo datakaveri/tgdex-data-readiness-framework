@@ -53,8 +53,8 @@ def compute_aggregate_score(report_dict, df):
         total_score += score
 
     # 3. Exact Row Duplicates
-    if "exact_row_duplicates" in report_dict:
-        dupes = report_dict["exact_row_duplicates"]
+    if "exact_row_duplicates_count" in report_dict:
+        dupes = report_dict["exact_row_duplicates_count"]
         prop = dupes / len(df)
         score = max(0, weights["exact_row_duplicates"] * (1 - prop))
         detailed_scores["exact_row_duplicates"] = round(score, 2)
