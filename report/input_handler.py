@@ -26,7 +26,7 @@ def load_data_from_directory(directory):
         for each loaded file. Only files with extensions '.csv', '.parquet', 
         and '.json' (excluding those containing 'metadata' in their name) are processed.
     """
-    metadata_names = ["dataset_metadata", "README", "data_description", "data_description_file", "data_attributes", "column_descriptor"]
+    metadata_names = ["dataset_metadata", "README", "data_description", "data_description_file", "data_attributes", "column_descriptor", "column_descriptions"]
     data = []
     files = [file for file in os.listdir(directory) if file.endswith(('.csv', '.parquet', '.json')) and not any(name in file for name in metadata_names) and 'metadata' not in file.lower()]
     subdirectories = [name for name in os.listdir(directory) if os.path.isdir(os.path.join(directory, name))]
@@ -40,7 +40,7 @@ def load_data_from_directory(directory):
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
         sample = False
-        if file_size > 1*10**8:  # 100MB
+        if file_size > 2*10**8:  # 200MB
             sample = True
         try:
             if file.endswith('.csv'):
@@ -93,7 +93,7 @@ def load_data_from_directory(directory):
             file_path = os.path.join(subdirectory_path, file)
             file_size = os.path.getsize(file_path)
             sample = False
-            if file_size > 5*10**8:  # 500MB
+            if file_size > 2*10**8:  # 200MB
                 sample = True
             try:
                 if file.endswith('.csv'):
@@ -133,5 +133,6 @@ def load_data_from_directory(directory):
             except Exception as e:
                 logging.error(f"Error loading file {file_path}: {e}")
     return data
+
 
 
