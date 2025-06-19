@@ -102,7 +102,7 @@ def generate_final_report(readiness_metrics_json_path):
             "exact_row_duplicates": 
             f"100% of rows are unique with no duplicates detected." if readiness_metrics_raw["detailed_scores"]["exact_row_duplicates"] == max_scores["exact_row_duplicates"] 
             else 
-            f"{round(100 - readiness_metrics_raw['exact_row_duplicates_percentage'], 1)}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates']} duplicate rows identified.",
+            f"{round(100 - readiness_metrics_raw['exact_row_duplicates_percentage'], 1)}% of rows are unique, with {readiness_metrics_raw['exact_row_duplicates_count']} duplicate rows identified.",
             
             "coverage_check": (
                 "No region columns found." if readiness_metrics_raw["region_coverage"] == 'None'

@@ -83,6 +83,6 @@ def check_row_duplicates(df):
     """
     count = int(df.duplicated(keep='first').sum())
     percentage = round(df.duplicated().mean() * 100, 1) if count > 0 else 0.0
-    return {"exact_row_duplicates": count,
+    return {"exact_row_duplicates_count": count,
             "exact_row_duplicates_percentage": percentage}  
 
