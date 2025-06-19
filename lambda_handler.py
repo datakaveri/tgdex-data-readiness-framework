@@ -148,7 +148,7 @@ def lambda_handler(event, context):
                             with zipfile.ZipFile(local_path, 'r') as zf:
                                 zf.extractall(temp_dir)
                     # Run your framework
-                    readiness_score = main(temp_dir, fk)
+                    main(temp_dir, fk)
                     logger.info("Data readiness framework executed successfully.")
                     # Upload reports to S3
                     for root, _, files in os.walk(temp_dir):
@@ -167,8 +167,7 @@ def lambda_handler(event, context):
                                 logger.info(f"Uploading report: {f} to bucket: {reports_bucket_name}")
                                 report_key = f"{os.path.basename(fk)}/{f}"
                                 logger.info(f"Report key: {report_key}")
-                                s3_client.upload_file(os.path.join(root, f), reports_bucket_name, report_key,
-                                                    ExtraArgs={"Metadata": {"readiness_score": readiness_score}})   
+                                s3_client.upload_file(os.path.join(root, f), reports_bucket_name, report_key)   
                                 logger.info(f"Uploaded report to S3: {report_key}")
             end_time = time.time()
             logger.info(f"Lambda invocation completed - RequestID: {request_id}")
