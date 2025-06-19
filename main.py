@@ -64,6 +64,7 @@ def main(directory, folder_key):
         for df, file_path, sample in data:
             try:
                 # Get the dataset name from the file path, strip special characters
+                dataset_name = os.path.splitext(os.path.basename(file_path))[0].replace('%20', ' ').replace('%21', '!').replace('%22', '"').replace('%23', '#').replace('%24', '$').replace('%25', '%').replace('%26', '&').replace('%27', "'").replace('%28', '(').replace('%29', ')').replace('%2A', '*').replace('%2B', '+').replace('%2C', ',').replace('%2D', '-').replace('%2E', '.').replace('%2F', '/').replace('%3A', ':').replace('%3B', ';').replace('%3C', '<').replace('%3D', '=').replace('%3E', '>').replace('%3F', '?').replace('%40', '@').replace('[', '(').replace(']', ')')
                 try:
                     true_name, uuid = log_and_call(get_dataset_name_from_url, folder_key)
                 except Exception:
@@ -71,7 +72,7 @@ def main(directory, folder_key):
                     logging.info(f"Could not fetch true name for {file_path}, using directory name: {true_name}")
 
                 sample_size = len(df)
-                logging.info(f"Sample size for {uuid}: {sample_size} rows")
+                logging.info(f"Sample size for {dataset_name}: {sample_size} rows")
 
 
                 file_path = os.path.dirname(file_path)
@@ -92,29 +93,29 @@ def main(directory, folder_key):
                 output_dir = get_output_dir(directory)
 
                 # Write the raw and final reports to JSON files
-                log_and_call(write_report_outputs, final_score, output_dir, uuid, init_report)
-                final_report = log_and_call(generate_final_report, f"{output_dir}/raw_readiness_report.json")
-                with open(f"{output_dir}/final_readiness_report.json", "w") as f:
+                log_and_call(write_report_outputs, final_score, output_dir, dataset_name, init_report)
+                final_report = log_and_call(generate_final_report, f"{output_dir}/{dataset_name}_raw_readiness_report.json")
+                with open(f"{output_dir}/{dataset_name}_final_readiness_report.json", "w") as f:
                     json.dump(final_report, f, indent=4)
                 logging.info(f"Report generated for {file_path}")
                 
                 # Generate a PDF report
                 pdf_output = f"{output_dir}/data_readiness_report.pdf"
                 logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"
-                log_and_call(generate_pdf_from_json, f"{output_dir}/final_readiness_report.json", pdf_output, uuid, final_score["total_score"], final_score["total_weights"], output_dir, true_name, sample_size, logo_path, sample)
+                log_and_call(generate_pdf_from_json, f"{output_dir}/{dataset_name}_final_readiness_report.json", pdf_output, uuid, final_score["total_percentage"], output_dir, true_name, sample_size, logo_path, sample)
                 logging.info(f"PDF generated for {file_path}")
                 
                 all_scores.append(final_score)
-                report_names = [f"{output_dir}/raw_readiness_report.json" for _, file_path, _ in data]
+                report_names = [f"{output_dir}/{dataset_name}_raw_readiness_report.json" for _, file_path, _ in data]
 
             except Exception as e:
                 logging.error(f"Error processing {file_path}: {e}")
-                logging.info(f"Skipping {uuid}")
+                logging.info(f"Skipping {dataset_name}")
         
         # If there are multiple files, generate a report with the average score across all the files
         if len(all_scores) > 1:
             output_dir = get_output_dir(directory)
-            raw_avg_report = log_and_call(calculate_average_readiness, report_names)
+            raw_avg_report, average_percentage = log_and_call(calculate_average_readiness, report_names)
 
             with open(f"{output_dir}/average_score_readiness_report.json", "w") as f:
                 json.dump(raw_avg_report, f, indent=4)
@@ -123,13 +124,13 @@ def main(directory, folder_key):
             with open(f"{output_dir}/average_score_final_readiness_report.json", "w") as f:
                 json.dump(final_avg_report, f, indent=4)
 
-            pdf_output = f"{output_dir}/average_score_data_readiness_report.pdf"
+            pdf_output = f"{output_dir}/data_readiness_report.pdf"
             logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-            log_and_call(generate_pdf_from_json, f"{output_dir}/average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_score"], raw_avg_report["total_weights"], output_dir, true_name, sample_size, logo_path, average_report=True)
+            log_and_call(generate_pdf_from_json, f"{output_dir}/average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_percentage"], output_dir, true_name, sample_size, logo_path, average_report=True)
             logging.info("Average score report generated for all datasets")
+            final_percentage = average_percentage if average_percentage is not None else "unknown"
         update_cat_readiness_score(uuid, final_percentage, elastic_id, elastic_pass)
-        if 'final_percentage' in locals():
-            return final_percentage
+        return
     except Exception as e:
         logging.error(f"Error: {e}")
 
