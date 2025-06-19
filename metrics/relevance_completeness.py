@@ -30,11 +30,17 @@ def check_coverage_region(df, imputed_columns=None):
             continue
         missing_values = df[col].isnull().sum()
         total_values = df[col].size
-        missing_percentage = (missing_values / total_values) * 100
+        if total_values == 0:
+            missing_percentage = 0
+        else:
+            missing_percentage = (missing_values / total_values) * 100
         missing_percentages[col] = round(missing_percentage, 1)
         overall_pct += missing_percentage
         num_non_null_cols += 1
-    overall_pct = round(overall_pct / num_non_null_cols, 1)
+    if num_non_null_cols == 0:
+        overall_pct = 0
+    else:
+        overall_pct = round(overall_pct / num_non_null_cols, 1)
     print('Overall Percentage for region coverage here is:', overall_pct)
     if overall_pct == 0.0:
         return {"region_coverage": 'None', "region_column": region_col}
