@@ -90,12 +90,12 @@ def generate_final_report(readiness_metrics_json_path):
         
         return {
             "column_missing": 
-            f"All {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
+            f"All {int(readiness_metrics_raw['number_of_columns'])} columns have at least 70% of their data filled" if readiness_metrics_raw["detailed_scores"]["column_missing"] == max_scores["column_missing"] 
             else 
             f"{readiness_metrics_raw['number_of_columns'] - readiness_metrics_raw['column_missing_count']} out of {readiness_metrics_raw['number_of_columns']} columns have at least 70% of their data filled",
 
             "row_missing": 
-            f"All {readiness_metrics_raw['number_of_rows']} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
+            f"All {int(readiness_metrics_raw['number_of_rows'])} rows have at least 50% of fields populated." if readiness_metrics_raw["detailed_scores"]["row_missing"] == max_scores["row_missing"] 
             else 
             f"{readiness_metrics_raw['number_of_rows'] - readiness_metrics_raw['row_missing_count']} out of {readiness_metrics_raw['number_of_rows']} rows ({round(100 - readiness_metrics_raw['row_missing_percentage'], 1)}%) have at least 50% of fields populated.",
 
