@@ -40,17 +40,21 @@ def load_data_from_directory(directory):
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
         sample = False
-        if file_size > 2*10**8:  # 200MB
+        if file_size > 1*10**8:  # 200MB
             sample = True
         try:
             if file.endswith('.csv'):
-                with open(file_path, 'rb') as f:
-                    # Avoid reading large files
-                    # chunk = f.read(10000)
-                    # result = chardet.detect(chunk)
-                    # encoding = result['encoding']
-                    # if encoding is not None and encoding.lower() == 'ascii':
-                    encoding = 'utf-8'
+                encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
+                for encoding in encodings:
+                    try:
+                        df = pd.read_csv(file_path, engine='python', encoding=encoding)
+                        df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                        break
+                    except UnicodeDecodeError as e:
+                        if encoding == encodings[-1]:
+                            raise e
+                        else:
+                            logging.warning(f"Error with encoding {encoding}, trying next encoding")
                 if sample:
                     df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
@@ -63,12 +67,12 @@ def load_data_from_directory(directory):
                     schema = pf.schema_arrow
                     first_batch = next(pf.iter_batches(batch_size=1000000))
                     df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
-                    df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
+                    df = df.convert_dtypes(dtype_backend='pyarrow')  # Convert dtypes to pandas dtypes
                     df = df.infer_objects()
                 else:
                     table = pa.parquet.read_table(file_path, columns=None)
                     df = table.to_pandas(types_mapper=pd.ArrowDtype)
-                    df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
+                    df = df.convert_dtypes(dtype_backend='pyarrow')  # Convert dtypes to pandas dtypes
                     df = df.infer_objects()
             elif file.endswith('.json'):
                 if sample:
@@ -93,14 +97,21 @@ def load_data_from_directory(directory):
             file_path = os.path.join(subdirectory_path, file)
             file_size = os.path.getsize(file_path)
             sample = False
-            if file_size > 2*10**8:  # 200MB
+            if file_size > 1*10**8:  # 200MB
                 sample = True
             try:
                 if file.endswith('.csv'):
-                    with open(file_path, 'rb') as f:
-                        chunk = f.read(10000)
-                        result = chardet.detect(chunk)
-                        encoding = result['encoding']
+                    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
+                    for encoding in encodings:
+                        try:
+                            df = pd.read_csv(file_path, engine='python', encoding=encoding)
+                            df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                            break
+                        except UnicodeDecodeError as e:
+                            if encoding == encodings[-1]:
+                                raise e
+                            else:
+                                logging.warning(f"Error with encoding {encoding}, trying next encoding")
                     if sample:
                         df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                         df = df.infer_objects()  # Convert dtypes to pandas dtypes
@@ -113,7 +124,7 @@ def load_data_from_directory(directory):
                         schema = pf.schema_arrow
                         first_batch = next(pf.iter_batches(batch_size=1000000))
                         df = pa.Table.from_batches([first_batch], schema=schema).to_pandas()
-                        df = df.convert_dtypes()  # Convert dtypes to pandas dtypes
+                        df = df.convert_dtypes(dtype_backend='pyarrow')  # Convert dtypes to pandas dtypes
                         df = df.infer_objects()
                     else:
                         table = pa.parquet.read_table(file_path, columns=None)
