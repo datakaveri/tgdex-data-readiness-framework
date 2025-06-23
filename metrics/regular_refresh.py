@@ -50,7 +50,7 @@ def check_date_or_timestamp_fields(df, imputed_columns=None):
         date_or_timestamp_fields_found.append(col)
         overall_pct += df[col].isnull().mean() * 100
         num_non_null_cols += 1
-    overall_pct = round(overall_pct / num_non_null_cols, 1)
+    overall_pct = round(overall_pct / num_non_null_cols, 1) if num_non_null_cols > 0 else 0.0
     return {"date_or_timestamp_fields_found": date_or_timestamp_fields_found,
             "date_or_timestamp_issues_percentage": overall_pct}
 
