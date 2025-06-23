@@ -2,8 +2,8 @@ import json
 
 def calculate_average_readiness(reports):
     # Define which keys to average, sum, and treat as lists
-    average_keys = {'total_weights', 'total_score', 'total_percentage' 'detailed_scores', 'column_missing_percentage', 'row_missing_percentage', 'exact_row_duplicates_percentage', 'region_coverage', 'percentage_low_variance_numeric_columns', 'percentage_dominant_categorical_columns', 'datetime_issues_percentage', 'date_or_timestamp_issues_percentage',"column_missing","row_missing", "exact_row_duplicates", "coverage_check", "numeric_variance", "categorical_variation", "file_format_check", "uniform_encoding", "date_or_timestamp_fields_found", "documentation_presence"}
-    sum_keys = {'column_missing_count', 'number_of_columns', 'row_missing_count', 'number_of_rows', 'exact_row_duplicates_count', 'number_of_numeric_columns', 'number_of_categorical_columns', 'number_of_date_columns', 'number_of_timestamp_columns'}
+    average_keys = {'total_weights', 'total_score', 'total_percentage' 'detailed_scores', 'column_missing_percentage', 'row_missing_percentage', 'exact_row_duplicates_percentage', 'region_coverage', 'percentage_low_variance_numeric_columns', 'percentage_dominant_categorical_columns', 'datetime_issues_percentage', 'date_or_timestamp_issues_percentage',"column_missing","row_missing", "exact_row_duplicates", "coverage_check", "numeric_variance", "categorical_variation", "file_format_check", "uniform_encoding", "date_or_timestamp_fields_found", "documentation_presence", 'number_of_columns'}
+    sum_keys = {'column_missing_count', 'row_missing_count', 'number_of_rows', 'exact_row_duplicates_count', 'number_of_numeric_columns', 'number_of_categorical_columns', 'number_of_date_columns', 'number_of_timestamp_columns'}
     list_keys = {'column_missing', 'region_column', 'low_variance_numeric_columns', 'numeric_columns', 'dominant_categorical_columns', 'categorical_columns', 'file_format', 'date_column', 'timestamp_column', 'date_or_timestamp_fields_found', 'documentation_found'}  
     average_report = {}
     count = 0
