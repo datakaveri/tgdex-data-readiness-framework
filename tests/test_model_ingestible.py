@@ -1,7 +1,7 @@
 # tests/test_model_ingestible.py
 
 import pandas as pd
-from metrics.model_ingestible import check_label_presence
+from structured_metrics.model_ingestible import check_label_presence
 
 def test_label_column_present():
     # Create a sample dataframe with a label column

@@ -1,10 +1,10 @@
-from metrics.quality import *
-from metrics.relevance_completeness import *
-from metrics.variance_correctness import *
-from metrics.standardization import *
-from metrics.model_ingestible import *
-from metrics.regular_refresh import *
-from metrics.documentation import *
+from structured_metrics.quality import *
+from structured_metrics.relevance_completeness import *
+from structured_metrics.variance_correctness import *
+from structured_metrics.standardization import *
+from structured_metrics.model_ingestible import *
+from structured_metrics.regular_refresh import *
+from structured_metrics.documentation import *
 import json 
 import logging 
 

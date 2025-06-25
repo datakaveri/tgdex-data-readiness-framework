@@ -1,6 +1,6 @@
 # tests/test_regular_refresh.py
 import pandas as pd
-from metrics.regular_refresh import check_date_or_timestamp_fields
+from structured_metrics.regular_refresh import check_date_or_timestamp_fields
 
 def test_check_date_or_timestamp_fields_empty_df():
     df = pd.DataFrame()

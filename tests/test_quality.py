@@ -1,5 +1,5 @@
 import pandas as pd
-from metrics.quality import check_column_missing, check_row_missing, check_row_duplicates
+from structured_metrics.quality import check_column_missing, check_row_missing, check_row_duplicates
 
 def test_check_column_missing():
     # Create a sample DataFrame

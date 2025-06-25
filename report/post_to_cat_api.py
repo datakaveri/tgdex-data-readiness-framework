@@ -57,7 +57,9 @@ def update_cat_readiness_score(uuid, score, username, password):
             # Define the update payload for POST request
             update_data = {
                 "doc": {
-                    "dataReadiness": score
+                    "dataReadiness": score,
+                    "dataUploadStatus": True
+
                 }
             }
 

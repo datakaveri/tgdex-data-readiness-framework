@@ -1,7 +1,7 @@
 import pytest
 import os
 import pandas as pd
-from metrics.standardization import check_file_format, check_date_and_timestamp_format 
+from structured_metrics.standardization import check_file_format, check_date_and_timestamp_format 
 
 @pytest.fixture(autouse=True)
 def temp_dir():

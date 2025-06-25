@@ -9,7 +9,7 @@ from report.multifile_average_score import calculate_average_readiness
 from report.dataset_clean_name_api import get_uuid_from_dataset_name, get_dataset_name_from_url
 from report.json_writer import write_report_outputs
 from report.pdf_writer import generate_pdf_from_json
-from metrics.llm_api import infer_column_roles_openai
+from structured_metrics.llm_api import infer_column_roles_openai
 from report.post_to_cat_api import update_cat_readiness_score
 
 print("Importing modules completed in main.py")

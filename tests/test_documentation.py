@@ -1,5 +1,5 @@
 import pytest
-from metrics.documentation import check_documentation_presence
+from structured_metrics.documentation import check_documentation_presence
 
 def test_file_exists_and_is_valid():
     assert check_documentation_presence("data") == {"documentation_found": False}
