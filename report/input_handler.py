@@ -40,21 +40,28 @@ def load_data_from_directory(directory):
         file_path = os.path.join(directory, file)
         file_size = os.path.getsize(file_path)
         sample = False
-        if file_size > 1*10**8:  # 200MB
+        if file_size > 4*10**8:  # 400MB
             sample = True
+            if sample:
+                logging.info(f"Sampling file: {file_path}")
         try:
             if file.endswith('.csv'):
-                encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
-                for encoding in encodings:
-                    try:
-                        df = pd.read_csv(file_path, engine='python', encoding=encoding)
-                        df = df.infer_objects()  # Convert dtypes to pandas dtypes
-                        break
-                    except UnicodeDecodeError as e:
-                        if encoding == encodings[-1]:
-                            raise e
-                        else:
-                            logging.warning(f"Error with encoding {encoding}, trying next encoding")
+                encoding = 'utf-8'  # Default encoding
+                # encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
+                # chunksize = 10**6
+                # for encoding in encodings:
+                #     try:
+                #         dfs = []
+                #         for chunk in pd.read_csv(file_path, engine='python', encoding=encoding, chunksize=chunksize):
+                #             dfs.append(chunk)
+                #         df = pd.concat(dfs, ignore_index=True)
+                #         df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                #         break
+                #     except UnicodeDecodeError as e:
+                #         if encoding == encodings[-1]:
+                #             raise e
+                #         else:
+                #             logging.warning(f"Error with encoding {encoding}, trying next encoding")
                 if sample:
                     df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                     df = df.infer_objects()  # Convert dtypes to pandas dtypes
@@ -97,21 +104,27 @@ def load_data_from_directory(directory):
             file_path = os.path.join(subdirectory_path, file)
             file_size = os.path.getsize(file_path)
             sample = False
-            if file_size > 1*10**8:  # 200MB
+            if file_size > 4*10**8:  # 400MB
                 sample = True
             try:
                 if file.endswith('.csv'):
-                    encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
-                    for encoding in encodings:
-                        try:
-                            df = pd.read_csv(file_path, engine='python', encoding=encoding)
-                            df = df.infer_objects()  # Convert dtypes to pandas dtypes
-                            break
-                        except UnicodeDecodeError as e:
-                            if encoding == encodings[-1]:
-                                raise e
-                            else:
-                                logging.warning(f"Error with encoding {encoding}, trying next encoding")
+                    encoding = 'utf-8'
+                    # Uncomment the following lines if you want to try multiple encodings
+                    # encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
+                    # chunksize = 10**6
+                    # for encoding in encodings:
+                    #     try:
+                    #         dfs = []
+                    #         for chunk in pd.read_csv(file_path, engine='python', encoding=encoding, chunksize=chunksize):
+                    #             dfs.append(chunk)
+                    #         df = pd.concat(dfs, ignore_index=True)
+                    #         df = df.infer_objects()  # Convert dtypes to pandas dtypes
+                    #         break
+                    #     except UnicodeDecodeError as e:
+                    #         if encoding == encodings[-1]:
+                    #             raise e
+                    #         else:
+                    #             logging.warning(f"Error with encoding {encoding}, trying next encoding")
                     if sample:
                         df = pd.read_csv(file_path, engine='python', encoding=encoding, nrows=1000000)
                         df = df.infer_objects()  # Convert dtypes to pandas dtypes
