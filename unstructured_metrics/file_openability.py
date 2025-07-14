@@ -27,6 +27,13 @@ def check_file_openability(directory):
         except IOError:
             all_openable = False
             break
-    return {"all_files_openable": all_openable}
+    not_openable_count = len(files) - sample.count(True)
+    not_openable_percentage = not_openable_count / len(files) * 100
+    openable_count = len(files) - not_openable_count
+    openable_percentage = 100 - not_openable_percentage
+    return {"not_openable_count": not_openable_count, 
+            "not_openable_percentage": not_openable_percentage, 
+            "openable_count": openable_count, 
+            "openable_percentage": openable_percentage}
 
 # TODO: Need to handle file types that may not be readable as text. May not be feasible without knowing what file types are expected.
