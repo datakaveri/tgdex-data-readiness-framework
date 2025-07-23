@@ -2,12 +2,12 @@ import openai
 import json
 import pandas as pd
 
-def infer_column_roles_openai(metadata, api_key):
+def infer_metadata_roles_openai(metadata, api_key):
     # Initialize client
     client = openai.OpenAI(api_key=api_key)
 
     system_prompt = (
-"You are a data analyst helping assess unstructured datasets for data readiness.\n"
+"You are a data analyst helping assess metadata from a list of files.\n"
 "Given:\n"
 "A list of file metadata entries (including fields like filename, folder path, title, description, tags, or keywords).\n"
 "Your tasks are:\n\n"
