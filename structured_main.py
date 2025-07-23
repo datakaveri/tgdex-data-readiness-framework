@@ -1,9 +1,9 @@
-print("Starting main.py")  
+print("Starting structured main.py")  
 import logging
 from dotenv import load_dotenv
 import json, os
 import report.input_handler as input_handler
-from report.aggregate import generate_raw_report, generate_final_report
+from report.aggregate_structured import generate_raw_report, generate_final_report
 import report.scoring as scoring
 from report.multifile_average_score import calculate_average_readiness
 from report.dataset_clean_name_api import get_uuid_from_dataset_name, get_dataset_name_from_url
