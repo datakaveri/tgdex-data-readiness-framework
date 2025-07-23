@@ -36,4 +36,3 @@ def check_file_openability(directory):
             "openable_count": openable_count, 
             "openable_percentage": openable_percentage}
 
-# TODO: Need to handle file types that may not be readable as text. May not be feasible without knowing what file types are expected.
