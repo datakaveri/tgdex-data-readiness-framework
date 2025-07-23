@@ -8,12 +8,6 @@ import time
 import json
 from dotenv import load_dotenv
 
-try:
-    from main import main
-    logging.info("main imported successfully")
-except Exception as e:
-    logging.error(f"Error importing main: {e}", exc_info=True)
-
 logging.info("Importing modules completed in lambda_handler.py")
 
 # Configure logging
@@ -148,7 +142,24 @@ def lambda_handler(event, context):
                             with zipfile.ZipFile(local_path, 'r') as zf:
                                 zf.extractall(temp_dir)
                     # Run your framework
-                    main(temp_dir, fk)
+                    # for structured datasets
+                    if any(f.endswith(('.parquet', '.csv', '.json')) for f in os.listdir(temp_dir)):
+                        try:
+                            from structured_main import main
+                            logging.info("main imported successfully")
+                        except Exception as e:
+                            logging.error(f"Error importing main: {e}", exc_info=True)
+
+                        main(temp_dir, fk)
+                    # for unstructured datasets
+                    elif any(f.endswith(('.xlsx', '.xls', '.pdf', '.mp3', '.jpg', '.jpeg', '.png', '.tiff', '.tif', '.txt', '.md', '.dcm')) for f in os.listdir(temp_dir)):
+                        try:
+                            from unstructured_main import main
+                            logging.info("main imported successfully")
+                        except Exception as e:
+                            logging.error(f"Error importing main: {e}", exc_info=True)
+                        
+                        main(temp_dir, fk)
                     logger.info("Data readiness framework executed successfully.")
                     # Upload reports to S3
                     for root, _, files in os.walk(temp_dir):
