@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import json, os
 import report.input_handler as input_handler
 from report.aggregate_structured import generate_raw_report, generate_final_report
-import report.scoring as scoring
+import report.scoring_structured as scoring
 from report.multifile_average_score import calculate_average_readiness
 from report.dataset_clean_name_api import get_uuid_from_dataset_name, get_dataset_name_from_url
 from report.json_writer import write_report_outputs
