@@ -88,7 +88,7 @@ def generate_final_report(readiness_metrics_json_path):
         
         return {
             "consistency": 
-            "All file types are uniform." if readiness_metrics_raw["uniform_file_types"] else "File types are inconsistent.",
+            "All file types are uniform." if readiness_metrics_raw["consistency"] else "File types are inconsistent.",
 
             "duplicate_files": 
             f"{int(readiness_metrics_raw['duplicate_percentage'])}% of files are unique.",
@@ -101,10 +101,10 @@ def generate_final_report(readiness_metrics_json_path):
                 else f"{readiness_metrics_raw['openable_percentage']}% of sampled files are openable without errors.",
             
             "file_format_check": 
-            f"{readiness_metrics_raw['valid_percentage']}% of files are in a standard format.",
+            f"{readiness_metrics_raw['valid_format_percentage']}% of files are in a standard format.",
             
             "annotation_presence": 
-            "Annotations are present." if readiness_metrics_raw["check_label_presence"] 
+            "Annotations are present." if readiness_metrics_raw["annotation_presence"] 
             else 'None',
 
             "timestamps_presence": 
