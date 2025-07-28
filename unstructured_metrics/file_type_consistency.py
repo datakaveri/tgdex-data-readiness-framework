@@ -17,5 +17,5 @@ def check_type_uniformity(directory):
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
     file_types = {os.path.splitext(f)[1] for f in files}
     
-    return {"uniform_file_types": len(file_types) <= 1}
+    return {"consistency": len(file_types) <= 1}
 

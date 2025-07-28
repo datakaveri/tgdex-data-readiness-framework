@@ -18,6 +18,6 @@ def check_label_presence(file_path):
     label_keywords = ["label", "annotation", "groundtruth", "tag", "mask", "segmentation", "bbox", "yolo", "class", "target", "output"]
     for filename in os.listdir(file_path):
         if any(keyword in filename.lower() for keyword in label_keywords):
-            return True
-    return False
+            return {"annotation_presence": True}
+    return {"annotation_presence": False}
 
