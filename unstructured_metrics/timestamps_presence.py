@@ -12,5 +12,5 @@ def check_timestamp_presence(imputed_roles):
     bool
         True if the 'timestamp' key exists and has non-empty values, False otherwise.
     """
-    return bool(imputed_roles.get("timestamps"))
+    return {"timestamps_presence": bool(imputed_roles.get("timestamps"))}
 

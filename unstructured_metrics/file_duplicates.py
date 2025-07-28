@@ -25,6 +25,7 @@ def check_file_duplicates(directory):
     duplicate_percentage = (duplicate_count / file_count * 100) if file_count > 0 else 0.0
 
     return {
+        "file_count": file_count,
         "file_duplicates_found": duplicate_found,
         "duplicate_count": duplicate_count,
         "duplicate_percentage": duplicate_percentage
