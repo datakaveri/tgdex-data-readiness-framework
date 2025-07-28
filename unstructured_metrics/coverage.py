@@ -12,5 +12,5 @@ def region_coverage(imputed_roles):
     bool
         True if the 'region' key exists and has non-empty values, False otherwise.
     """
-    return bool(imputed_roles.get("regions"))
+    return {"region_coverage": bool(imputed_roles.get("regions"))}
 
