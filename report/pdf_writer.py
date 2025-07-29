@@ -170,7 +170,7 @@ class PDFReport(FPDF):
             self.ln()
             section_num+=1 
 
-def generate_pdf_from_json(json_path, output_path, dataset_name, total_percentage, directory, true_name, sample_size, logo_path=None, sample=False, average_report=False):
+def generate_pdf_from_json(json_path, output_path, dataset_name, total_percentage, directory, true_name, logo_path=None, sample_size=None, sample=False, average_report=False):
     """
     Generates a PDF report from a JSON file containing readiness data.
 
