@@ -1,4 +1,4 @@
-def compute_aggregate_score(report_dict, df):
+def compute_aggregate_score(report_dict):
     """
     Computes the aggregate score from a dictionary of individual metrics.
 

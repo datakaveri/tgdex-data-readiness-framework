@@ -86,24 +86,19 @@ def extract_all_metadata(filepath):
 
 
 def process_folder_to_metadata_json(folder_path):
-    results = {}
-    for file in os.listdir(folder_path):
-        full_path = os.path.join(folder_path, file)
-        if os.path.isfile(full_path):
-            print(f"Processing: {file}")
-            metadata = extract_all_metadata(full_path)
-
-            if isinstance(metadata, dict) and (
-                not metadata or 
-                ("warning" in metadata and metadata["warning"] == "No metadata found")
-            ):
-                print(f"  No metadata for: {file}")
-                results[file] = {"info": "No metadata found"}
-            else:
-                results[file] = metadata
-    return results
-
-def get_first_1000_filenames(folder_path):
+    metadata_results = {}
     file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-    return file_names[:1000]
+    for file in file_names[:1000]:
+        full_path = os.path.join(folder_path, file)
+        print(f"Processing: {file}")
+        metadata = extract_all_metadata(full_path)
 
+        if isinstance(metadata, dict) and (
+            not metadata or 
+            ("warning" in metadata and metadata["warning"] == "No metadata found")
+        ):
+            print(f"  No metadata for: {file}")
+            metadata_results[file] = {"info": "No metadata found"}
+        else:
+            metadata_results[file] = metadata
+    return metadata_results

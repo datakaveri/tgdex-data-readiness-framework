@@ -102,7 +102,7 @@ def main(directory, folder_key):
                 # Generate a PDF report
                 pdf_output = f"{output_dir}/data_readiness_report.pdf"
                 logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"
-                log_and_call(generate_pdf_from_json, f"{output_dir}/{dataset_name}_final_readiness_report.json", pdf_output, uuid, final_score["total_percentage"], output_dir, true_name, sample_size, logo_path, sample)
+                log_and_call(generate_pdf_from_json, f"{output_dir}/{dataset_name}_final_readiness_report.json", pdf_output, uuid, final_score["total_percentage"], output_dir, true_name, logo_path, sample_size, sample)
                 logging.info(f"PDF generated for {file_path}")
                 
                 all_scores.append(final_score)
@@ -126,7 +126,7 @@ def main(directory, folder_key):
 
             pdf_output = f"{output_dir}/data_readiness_report.pdf"
             logo_path = "plots/pretty/TGDEX_Logo Unit_Green.png"  # Set this to None if not needed
-            log_and_call(generate_pdf_from_json, f"{output_dir}/average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_percentage"], output_dir, true_name, sample_size, logo_path, average_report=True)
+            log_and_call(generate_pdf_from_json, f"{output_dir}/average_score_final_readiness_report.json", pdf_output, uuid, raw_avg_report["total_percentage"], output_dir, true_name, logo_path, sample_size, average_report=True)
             logging.info("Average score report generated for all datasets")
             final_percentage = average_percentage if average_percentage is not None else "unknown"
         update_cat_readiness_score(uuid, final_percentage, elastic_id, elastic_pass)
