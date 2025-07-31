@@ -78,7 +78,7 @@ def generate_final_report(readiness_metrics_json_path):
         max_scores = {
             "consistency": 15,
             "duplicate_files": 15,
-            "coverage": 10,
+            "region_coverage": 10,
             "file_openability": 15,
             "file_format_check": 15,
             "annotation_presence": 10,
@@ -91,14 +91,14 @@ def generate_final_report(readiness_metrics_json_path):
             "All file types are uniform." if readiness_metrics_raw["consistency"] else "File types are inconsistent.",
 
             "duplicate_files": 
-            f"{int(readiness_metrics_raw['duplicate_percentage'])}% of files are unique.",
+            f"{100 - int(readiness_metrics_raw['duplicate_percentage'])}% of files are duplicates.",
 
-            "coverage": 
+            "region_coverage": 
             f"{readiness_metrics_raw['region_coverage']}% coverage achieved for region metadata." if readiness_metrics_raw['region_coverage'] else 'None',
 
             "file_openability": 
-                "All sampled files are openable without errors." if readiness_metrics_raw["file_openability"] == max_scores["file_openability"]
-                else f"{readiness_metrics_raw['openable_percentage']}% of sampled files are openable without errors.",
+                "All sampled files are openable without errors." if readiness_metrics_raw["detailed_scores"]["file_openability"] == max_scores["file_openability"]
+                else f"{readiness_metrics_raw['file_openable_percentage']}% of sampled files are openable without errors.",
             
             "file_format_check": 
             f"{readiness_metrics_raw['valid_format_percentage']}% of files are in a standard format.",
@@ -145,15 +145,15 @@ def generate_final_report(readiness_metrics_json_path):
         },
         {
             "bucket": "Data Relevance and Completeness",
-            "weight": 0 if notes["coverage"] == "None" or detailed_scores["coverage"] == 0 else 10,
+            "weight": 0 if notes["region_coverage"] == "None" or detailed_scores["region_coverage"] == False else 10,
             "tests": [
                 {
                     "id": "2.1",
-                    "key": "coverage",
+                    "key": "region_coverage",
                     "title": "Coverage Check",
-                    "note": notes["coverage"],
-                    "score": detailed_scores["coverage"],
-                    "max_score": 0 if notes["coverage"] == "None" or detailed_scores["coverage"] == 0 else 10
+                    "note": notes["region_coverage"],
+                    "score": detailed_scores["region_coverage"],
+                    "max_score": 0 if notes["region_coverage"] == "None" or detailed_scores["region_coverage"] == False else 10
                 },
             ]
         },
@@ -203,7 +203,7 @@ def generate_final_report(readiness_metrics_json_path):
                     "title": "Timestamps Presence",
                     "note": notes["timestamps_presence"],
                     "score": detailed_scores["timestamps_presence"],
-                    "max_score": 0 if notes["timestamps_presence"] == "None" or detailed_scores["date_or_timestamp_fields_found"] == 0 else 10
+                    "max_score": 0 if notes["timestamps_presence"] == "None" or detailed_scores["timestamps_presence"] == 0 else 10
                 }
             ]
         },
