@@ -41,13 +41,15 @@ def get_mp3_metadata(filepath):
 def get_image_metadata(filepath):
     img = Image.open(filepath)
     info = img.info
-    exif_data = img._getexif()
-    exif = {}
-    if exif_data:
-        for tag, value in exif_data.items():
-            name = TAGS.get(tag, tag)
-            exif[name] = value
-    return {**info, **exif}
+    # exif_data = img._getexif()
+    # exif = {}
+    # if exif_data:
+    #     for tag, value in exif_data.items():
+    #         name = TAGS.get(tag, tag)
+    #         exif[name] = None
+    # return {**info, **exif}
+    return {**info}
+
 
 
 def get_text_metadata(filepath):
@@ -88,17 +90,16 @@ def extract_all_metadata(filepath):
 def process_folder_to_metadata_json(folder_path):
     metadata_results = {}
     file_names = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
-    for file in file_names[:1000]:
+    for file in file_names[:10]:
         full_path = os.path.join(folder_path, file)
         print(f"Processing: {file}")
         metadata = extract_all_metadata(full_path)
 
-        if isinstance(metadata, dict) and (
-            not metadata or 
-            ("warning" in metadata and metadata["warning"] == "No metadata found")
-        ):
-            print(f"  No metadata for: {file}")
-            metadata_results[file] = {"info": "No metadata found"}
-        else:
-            metadata_results[file] = metadata
+        if isinstance(metadata, dict):
+            cleaned_metadata = {k: str(v) for k, v in metadata.items()}
+            if not cleaned_metadata or ("warning" in cleaned_metadata and cleaned_metadata["warning"] == "No metadata found"):
+                print(f"  No metadata for: {file}")
+                metadata_results[file] = {"info": "No metadata found"}
+            else:
+                metadata_results[file] = cleaned_metadata
     return metadata_results
