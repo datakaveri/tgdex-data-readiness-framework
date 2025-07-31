@@ -37,6 +37,8 @@ def log_and_call(func, *args, **kwargs):
     return func(*args, **kwargs)
 
 def main(directory, folder_key):
+    print(f"Running unstructured_main.main on {directory} with folder_key={folder_key}")
+
     """
     Main function to run the entire data readiness report pipeline for unstructured data.
     - Processes each subdirectory as a dataset, or the root directory if there are no subdirectories.
@@ -56,10 +58,10 @@ def main(directory, folder_key):
         for dataset_path in dataset_paths:
             logging.info(f"Processing dataset folder: {dataset_path}")
 
-            # 1. Extract metadata for up to 1000 files in this dataset folder
+            # 1. Extract metadata for up to 10 files in this dataset folder
             metadata = log_and_call(metadata_parser.process_folder_to_metadata_json, dataset_path)
             logging.info(f"Extracted metadata for {len(metadata)} files in {dataset_path}")
-
+            print(type(metadata))
             if not metadata:
                 logging.error(f"No metadata files found in {dataset_path}")
                 continue
@@ -77,7 +79,7 @@ def main(directory, folder_key):
             logging.info(f"Inferred roles for {uuid}: {imputed_roles}")
 
             # 3. Generate the raw readiness report (based on metadata)
-            init_report = log_and_call(generate_raw_report, metadata, dataset_path, imputed_roles)
+            init_report = log_and_call(generate_raw_report, dataset_path, imputed_roles)
 
             # 4. Compute the aggregate score (using unstructured scoring)
             final_score = log_and_call(scoring.compute_aggregate_score, init_report)
