@@ -21,17 +21,17 @@ def compute_aggregate_score(report_dict):
     weights = {
         "consistency": 15,
         "duplicate_files": 15,
-        "coverage": 10 if report_dict.get("region_coverage") != 'None' else 0,
+        "region_coverage": 10 if report_dict.get("region_coverage") == True else 0,
         "file_openability": 15,
         "file_format_check": 15,
-        "annotation_presence": 10 if report_dict.get("annotation_presence") != 'None' else 0,
-        "timestamps_presence": 10 if report_dict.get("timestamps_presence") != 'None' else 0,
+        "annotation_presence": 10 if report_dict.get("annotation_presence") == True else 0,
+        "timestamps_presence": 10 if report_dict.get("timestamps_presence") == True else 0,
         "documentation_presence": 10,
     }
 
     # 1. File Type Consistency (binary scoring)
     if "consistency" in report_dict:
-        if "consistency" in report_dict and report_dict["consistency"] != 'None':
+        if "consistency" in report_dict and report_dict["consistency"] != False:
             score = weights["consistency"]
         else:
             score = 0
@@ -48,7 +48,7 @@ def compute_aggregate_score(report_dict):
 
     # 3. Region Coverage
     if "region_coverage" in report_dict:
-        if "region_coverage" in report_dict and report_dict["region_coverage"] != 'None':
+        if "region_coverage" in report_dict and report_dict["region_coverage"] == True:
             score = weights["region_coverage"]
         else:
             score = 0
@@ -56,16 +56,16 @@ def compute_aggregate_score(report_dict):
         total_score += score
 
     # 4. File Openability (Proportion of files that open without any errors)
-    if "openable_percentage" in report_dict:
-        file_openability = report_dict["openable_percentage"]
-        score = max(0, weights["file_openability"] * (1 - file_openability / 100))
+    if "file_openable_percentage" in report_dict:
+        prop = report_dict["file_not_openable_percentage"]
+        score = max(0, weights["file_openability"] * (1 - prop / 100))
         detailed_scores["file_openability"] = round(score, 2)
         total_score += score
 
     # 5. File Format Check
     if "valid_format_percentage" in report_dict:
-        valid_format_percentage = report_dict["valid_format_percentage"]
-        score = max(0, weights["file_format_check"] * (1 - valid_format_percentage / 100))
+        prop = report_dict["invalid_format_percentage"]
+        score = max(0, weights["file_format_check"] * (1 - prop / 100))
         detailed_scores["file_format_check"] = round(score, 2)
         total_score += score
 
