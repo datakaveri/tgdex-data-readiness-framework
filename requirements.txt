@@ -9,3 +9,9 @@ boto3==1.28.66
 pyarrow==14.0.1
 requests==2.32.4
 numpy==1.26.4
+openpyxl==3.1.5
+pydicom==3.0.1
+xlrd==2.0.2
+PyPDF2==3.0.1
+mutagen==1.47.0
+pillow==11.3.0
