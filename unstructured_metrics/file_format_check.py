@@ -18,7 +18,7 @@ def check_file_format(directory):
         - "valid_format_percentage": The percentage of files in the directory that are in a standard format.
         - "invalid_format_percentage": The percentage of files in the directory that are not in a standard format.
     """
-    valid_formats = ['.xlsx', '.xls', '.pdf', '.mp3', '.jpg', '.png', '.tiff', '.tif', '.txt', '.md', '.dcm']
+    valid_formats = ['.xlsx', '.xls', '.pdf', '.mp3', '.jpg', '.jpeg', '.png', '.tiff', '.tif', '.txt', '.md', '.dcm']
     label_keywords = ["label", "annotation", "groundtruth", "tag", "mask", "segmentation", "bbox", "yolo", "class", "target", "output"]
     files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and not any(keyword in f.lower() for keyword in label_keywords)]
     valid_format_count = sum(1 for f in files if any(f.endswith(fmt) for fmt in valid_formats))
