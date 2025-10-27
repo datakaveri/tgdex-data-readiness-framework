@@ -12,7 +12,7 @@ def get_dataset_name_from_url(uuid, url_format=url_format):
     }
     response = requests.get(url, headers=headers)
     response_json = response.json()
-    results = response_json.get('results', [])
+    results = response_json.get('result', [])
     dataset_uuid = get_uuid_from_dataset_name(uuid)
     if results:
         true_name = results[0].get('label', None)
