@@ -59,8 +59,7 @@ def update_cat_readiness_score(uuid, score, username, password):
                 "doc": {
                     "dataReadiness": score,
                     "dataUploadStatus": True,
-                    "publishStatus": "ACTIVE",
-
+                    "publishStatus": "ACTIVE"
                 }
             }
 
