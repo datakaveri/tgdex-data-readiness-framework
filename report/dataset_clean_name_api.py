@@ -1,6 +1,6 @@
 import requests
 
-url_format = 'https://dx.tgdex.telangana.gov.in/tgdex/cat/v1/item?id={}'
+url_format = 'https://controlplane.tgdex.telangana.gov.in/iudx/v2/cat/item?id={}'
 def get_uuid_from_dataset_name(folder_name):
     return folder_name.split('.')[0]
 
@@ -12,10 +12,12 @@ def get_dataset_name_from_url(uuid, url_format=url_format):
     }
     response = requests.get(url, headers=headers)
     response_json = response.json()
-    results = response_json.get('result', [])
+    print("Dataset name API response:", response_json)
+    result = response_json.get('result', [])
+    
     dataset_uuid = get_uuid_from_dataset_name(uuid)
-    if results:
-        true_name = results[0].get('label', None)
+    if result:
+        true_name = result[0].get('label', None)
     else:
         true_name = None
     return true_name, dataset_uuid
