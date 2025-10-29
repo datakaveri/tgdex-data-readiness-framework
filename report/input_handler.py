@@ -1,10 +1,13 @@
 print("Starting input_handler.py")
+import csv
 import os
 import pandas as pd
 import chardet
 import logging
 import pyarrow as pa
 from pyarrow.parquet import ParquetFile
+import csv
+import sys
 print("Importing modules completed in input_handler.py")
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -46,6 +49,14 @@ def load_data_from_directory(directory):
                 logging.info(f"Sampling file: {file_path}")
         try:
             if file.endswith('.csv'):
+                max_int = sys.maxsize
+                # Some platforms raise OverflowError when you pass sys.maxsize directly; degrade gracefully
+                while True:
+                    try:
+                        csv.field_size_limit(max_int)
+                        break
+                    except OverflowError:
+                        max_int = int(max_int / 10)
                 encoding = 'utf-8'  # Default encoding
                 # encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
                 # chunksize = 10**6
@@ -108,6 +119,15 @@ def load_data_from_directory(directory):
                 sample = True
             try:
                 if file.endswith('.csv'):
+                    # raise csv field size limit to the largest possible value
+                    max_int = sys.maxsize
+                    # Some platforms raise OverflowError when you pass sys.maxsize directly; degrade gracefully
+                    while True:
+                        try:
+                            csv.field_size_limit(max_int)
+                            break
+                        except OverflowError:
+                            max_int = int(max_int / 10)
                     encoding = 'utf-8'
                     # Uncomment the following lines if you want to try multiple encodings
                     # encodings = ['utf-8', 'latin1', 'iso-8859-1', 'mac-roman', 'cp1252']
