@@ -76,6 +76,8 @@ def check_categorical_variation(df, imputed_columns=None, dominance_threshold=0.
         if df[col].notnull().any():
             if df[col].value_counts(normalize=True).iloc[0] > dominance_threshold:
                 dominant_cols.append(col)
+        elif df[col].isnull().all():  # If all values are NA, consider it as dominant
+            dominant_cols.extend([col])
                 
     num_categorical_cols = len(categorical_cols)
     percentage = round(len(dominant_cols) / num_categorical_cols * 100, 1) if num_categorical_cols > 0 else 0
