@@ -47,7 +47,7 @@ def compute_aggregate_score(report_dict, df):
     # 2. Row-wise Missing (proportion of rows with >50% missing)
     if "row_missing_count" in report_dict:
         affected_rows = report_dict["row_missing_count"]
-        prop = affected_rows / len(df)
+        prop = affected_rows / len(df) if len(df) > 0 else 1
         score = max(0, weights["row_missing"] * (1 - prop))
         detailed_scores["row_missing"] = round(score, 2)
         total_score += score
@@ -55,7 +55,7 @@ def compute_aggregate_score(report_dict, df):
     # 3. Exact Row Duplicates
     if "exact_row_duplicates_count" in report_dict:
         dupes = report_dict["exact_row_duplicates_count"]
-        prop = dupes / len(df)
+        prop = dupes / len(df) if len(df) > 0 else 1
         score = max(0, weights["exact_row_duplicates"] * (1 - prop))
         detailed_scores["exact_row_duplicates"] = round(score, 2)
         total_score += score
@@ -127,10 +127,11 @@ def compute_aggregate_score(report_dict, df):
         total_score += score
     
     # Output the results as a dictionary
+    total_weights = sum(weights.values())
     final_report = {
-        "total_weights": sum(weights.values()),
+        "total_weights": total_weights,
         "total_score": round(total_score, 2),
-        "total_percentage": round(total_score / sum(weights.values()) * 100, 2),
+        "total_percentage": round(total_score / total_weights * 100, 2) if total_weights > 0 else 0,
         "detailed_scores": detailed_scores
     }
     
