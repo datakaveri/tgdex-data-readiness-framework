@@ -22,22 +22,47 @@ def check_column_missing(df, threshold=0.3):
         The third key maps to the percentage of columns with missing values above
         the threshold relative to the total number of columns in the DataFrame.
     """
+
+    # Number of columns (guard against zero-column DataFrame)
+    num_cols = df.shape[1] if df is not None else 0
+
+    # Build missing_report: include columns where proportion missing > threshold
+    # or columns that are entirely null (but ignore truly empty Series)
+    if df.empty:
+        # All columns are effectively missing
+        missing_report = {col: 100.0 for col in df.columns}
+        return {
+            "column_missing": missing_report,
+            "column_missing_count": len(missing_report),
+            "column_missing_percentage": 100.0,
+            "number_of_columns": df.shape[1]
+        }
     missing_report = {
         col : round(df[col].isnull().mean() * 100, 2)
         for col in df.columns
         if df[col].isnull().mean() > threshold or (df[col].isnull().all() and not df[col].empty)
     }
+    
+    # If there are no columns, return zeros (avoid division by zero)
+    if num_cols == 0:
+        return {
+            "column_missing": {},
+            "column_missing_count": 0,
+            "column_missing_percentage": 0.0,
+            "number_of_columns": 0,
+        }
+
     if not missing_report:
         return {"column_missing": {},
                 "column_missing_count": 0,
                 "column_missing_percentage": 0.0,
-                "number_of_columns": df.shape[1]}
+                "number_of_columns": num_cols}
     else:
         return {"column_missing": missing_report,
                 "column_missing_count": len(missing_report),
-                "column_missing_percentage": round(len(missing_report) / df.shape[1] * 100, 1),
-                "number_of_columns": df.shape[1]}
-
+                "column_missing_percentage": round(len(missing_report) / num_cols * 100, 1),
+                "number_of_columns": num_cols}
+    
 def check_row_missing(df, threshold=0.5):
     """
     Check which rows have missing values above a certain threshold.
@@ -59,10 +84,11 @@ def check_row_missing(df, threshold=0.5):
     """
 
     count = df[df.isnull().mean(axis=1) >= threshold].shape[0]
-    percentage = round(count / df.shape[0] * 100, 1) if count > 0 else 0.0
+    num_rows = df.shape[0]
+    percentage = round(count / num_rows * 100, 1) if count > 0 else 0.0
     return {"row_missing_count": count,
             "row_missing_percentage": percentage,
-            "number_of_rows": df.shape[0]}
+            "number_of_rows": num_rows}
 
 def check_row_duplicates(df):
     """
