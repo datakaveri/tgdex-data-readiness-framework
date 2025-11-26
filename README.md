@@ -36,7 +36,14 @@ S3_REPORTS_BUCKET_NAME=your_output_bucket_name
 ## 3. Usage
 
 ### Local Execution
-You can run the assessment locally for specific directories.
+You can run the assessment locally by running the 'local_lambda_tester.py' file. Ensure that the path is pointing to the data in your local directory. Also ensure that your .env file is configured with your OpenAI API key.
+
+```python
+# Example event (simulate API Gateway event)
+event = {
+    "body": '{"folder_key": "path/to/local/dataset/folder/"}'
+}
+```
 
 **For Structured Data:**
 ```bash
