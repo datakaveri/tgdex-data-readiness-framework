@@ -14,4 +14,4 @@ pydicom==3.0.1
 xlrd==2.0.2
 PyPDF2==3.0.1
 mutagen==1.47.0
-pillow==11.3.0
+pillow==12.2.0
